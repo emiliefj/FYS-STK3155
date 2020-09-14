@@ -13,15 +13,19 @@ class OrdinaryLeastSquares:
     def __init__(self,X,z):
         self.X = X
         self.z = z
+        # self.beta = np.linalg.inv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
+        # self.ztilde = self.X.dot(beta)
 
     def regress(self):
         ''' Regression using Ordinary Least Squares.
 
-        X     - The design matrix
-        z     - The output vars
-
-        @return the prediction for the output, ztilde
+        X      - The design matrix
+        z      - The output vars
+        beta   - The parameters beta
+        ztilde - The prediction for z
         '''
+        # Include this in constructor instead of own method? Assures ztilde 
+        # and beta are created when calling other methods
         self.beta = np.linalg.inv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
         self.ztilde = self.X.dot(beta)
         return ztilde

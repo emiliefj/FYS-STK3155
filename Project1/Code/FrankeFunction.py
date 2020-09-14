@@ -4,6 +4,7 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
 #from random import random, seed
+#from numba import jit
 
 class FrankeFunction:
     '''
@@ -25,12 +26,12 @@ class FrankeFunction:
         term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
         self.x = x
         self.y = y
-        self.data = term1 + term2 + term3 + term4
+        self.z = term1 + term2 + term3 + term4
     
-    def getValues(self):
-        return self.data
+    def get_values(self):
+        return self.z
 
-    def addNormalNoise(self,mean,variance):
+    def add_normal_noise(self,mean,variance):
         '''
         Adds some noise to the data in the form of
         random numbers following a normal distribution
@@ -39,41 +40,37 @@ class FrankeFunction:
         mean        -- the mean of the distribution
         variance     -- sigma**2 of the distribution
         '''
-        self.data = self.data + np.random.normal(mean,variance,self.data.shape)
+        self.z = self.z + np.random.normal(mean,variance,self.z.shape)
+
+    def plot_function(self):
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        # Plot the surface.
+        surf = ax.plot_surface(self.x, self.y, self.z, cmap=cm.coolwarm,
+                       linewidth=0, antialiased=False)
+        # Customize the z axis.
+        ax.set_zlim(-0.10, 1.40)
+        ax.zaxis.set_major_locator(LinearLocator(10))
+        ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+
+        # Add a color bar which maps values to colors.
+        fig.colorbar(surf, shrink=0.5, aspect=5)
+
+        plt.show()
 
 # Make data
 x = np.arange(0, 1, 0.05)
 y = np.arange(0, 1, 0.05)
 x, y = np.meshgrid(x,y)
-frankeFunction = FrankeFunction(x, y)
-frankeFunction.addNormalNoise(0,0.01) # add noise
-z = frankeFunction.getValues()
-
-#
-# Create figure
-#
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-
-# Plot the surface.
-surf = ax.plot_surface(x, y, z, cmap=cm.coolwarm,
-                       linewidth=0, antialiased=False)
-
-# Customize the z axis.
-ax.set_zlim(-0.10, 1.40)
-ax.zaxis.set_major_locator(LinearLocator(10))
-ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-
-# Add a color bar which maps values to colors.
-fig.colorbar(surf, shrink=0.5, aspect=5)
-
-plt.show()
+franke_function = FrankeFunction(x, y)
+franke_function.add_normal_noise(0,0.01)
+franke_function.plot_function()
 
 
 # ----------
 
 # @jit
-def create_design_matrix(x,y,d):
+def create_design_matrix(x,y,d): # Not sure where to put this yet
     ''' Set up design matrix X
 
     Builds the design matrix X for a polynomial of degree n
