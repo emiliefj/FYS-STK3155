@@ -15,6 +15,7 @@ class OrdinaryLeastSquares:
         self.X = X
         self.z = z
         self.n = np.size(z)
+        self.is_regressed = False
         # self.beta = np.linalg.inv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
         # self.ztilde = self.X.dot(beta)
 
@@ -28,9 +29,9 @@ class OrdinaryLeastSquares:
         '''
         # Include this in constructor instead of own method? Assures ztilde 
         # and beta are created when calling other methods
-        self.beta = np.linalg.inv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
-        self.ztilde = self.X.dot(beta)
-        return ztilde
+        self.beta = np.linalg.pinv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
+        self.ztilde = self.X.dot(self.beta)
+        return self.ztilde
 
     def bootstrap(self,B,statistic):
         '''Resampling using the bootstrap method
@@ -39,12 +40,14 @@ class OrdinaryLeastSquares:
         on the data z.
 
         B         - Number of bootstraps
-        statistic - the statistic to be estimated
+        statistic - the statistic to be estimated (a method)
         returns an array of the calculated theta values
         '''
         theta = zeros(B)
         for i in range(B):
             theta[i] = statistic(z[randint(0,self.n,self.n)]) # Randomly select n vars from z
+
+        return theta
 
 
     def mean_square_error(self):
@@ -60,11 +63,17 @@ class OrdinaryLeastSquares:
         return np.sum(self.z)/self.n
 
     def variance_of_beta(self):
-        self.var_of_beta = self.sigma2*np.linalg.inv(self.X.T.dot(self.X))
+        '''Finds the variance for the parameters beta.'''
+        self.var_of_beta = np.diag(self.sigma2*np.linalg.inv(self.X.T.dot(self.X)))
+        return self.var_of_beta
 
     def sigma2(self):
         '''Finds the variance of z.'''
-        # How?
+        if not self.is_regressed:
+            self.regress()
+        self.sigma_squared = np.sum((self.z-np.mean(self.z))**2)/(np.size(z)-1)
+
+        return self.sigma_squared
 
 
 
