@@ -2,8 +2,10 @@
 
 # Imports
 import numpy as np
+import matplotlib.pyplot as plt
 import CreateData as cd
 import OrdinaryLeastSquares as ols
+
 
 
 #
@@ -23,3 +25,4 @@ data.scale_dataset()
 #
 OLS = ols.OrdinaryLeastSquares(data.X_train_scaled,data.z_train)
 OLS.regress()
+plt.plot(OLS.ztilde,data.z_train)

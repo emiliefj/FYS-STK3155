@@ -10,8 +10,8 @@ class CreateData:
     n   - The number of data points in the x and y 
           arrays
     '''
-    def __init__(self,n,seed):
-        np.random.seed(seed=9)
+    def __init__(self,n,seed=9):
+        np.random.seed(seed=seed)
         self.n = n
         self.x = np.random.rand(n)#np.linspace(0,1,self.n)
         self.y = np.random.rand(n)#np.linspace(0,1,self.n)
