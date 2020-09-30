@@ -1,5 +1,7 @@
 import numpy as np
 from numpy.random import randint
+import warnings
+import scipy.stats
 
 class OrdinaryLeastSquares:
     ''' Perform OLS regression and assess performance.
@@ -11,15 +13,13 @@ class OrdinaryLeastSquares:
     - Bootstrap
     '''
 
-    def __init__(self,X,z):
-        self.X = X
-        self.z = z
-        self.n = np.size(z)
+    def __init__(self):
+        
         self.is_regressed = False
         # self.beta = np.linalg.inv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
-        # self.ztilde = self.X.dot(beta)
+        # z_prediction = self.X.dot(beta)
 
-    def regress(self):
+    def fit(self,X,z):
         ''' Regression using Ordinary Least Squares.
 
         X      - The design matrix
@@ -29,9 +29,19 @@ class OrdinaryLeastSquares:
         '''
         # Include this in constructor instead of own method? Assures ztilde 
         # and beta are created when calling other methods
+
+        self.X = X
+        self.z = z
+        self.n = np.size(z)
+        
         self.beta = np.linalg.pinv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
         self.ztilde = self.X.dot(self.beta)
+        self.is_regressed = True
+       
         return self.ztilde
+
+    def predict(self,input):
+        return input.dot(self.beta)
 
     def bootstrap(self,B,statistic):
         '''Resampling using the bootstrap method
@@ -50,30 +60,58 @@ class OrdinaryLeastSquares:
         return theta
 
 
-    def mean_square_error(self):
-        ''' Returns the Mean Square Error of z.'''
-        return np.sum((self.z-self.ztilde)**2)/self.n
+    def mean_square_error(self,z_prediction=None,z_actual=None):
+        ''' Returns the Mean Square Error '''
+        if z_prediction is None:
+            z_prediction = self.ztilde
+        if z_actual is None:
+            z_actual = self.z
 
-    def R2(self):
+        return np.sum((z_actual-z_prediction)**2)/self.n
+
+    def r2(self,z_prediction=None,z_actual=None):
         '''Returns the R**2 value for z.'''
-        return 1-np.sum((self.z-self.ztilde)**2)/np.sum((self.z-self.mean(self.z))**2)
+        if z_prediction is None:
+            z_prediction = self.ztilde
+        if z_actual is None:
+            z_actual = self.z
+        
+        return 1-np.sum((z_prediction-z_actual)**2)/np.sum((z_prediction-self.mean(z_prediction))**2)
 
-    def mean(self):
+    def mean(self,z):
         ''' Returns the mean of the values of the array z.'''
-        return np.sum(self.z)/self.n
+        return np.sum(z)/self.n
 
     def variance_of_beta(self):
         '''Finds the variance for the parameters beta.'''
-        self.var_of_beta = np.diag(self.sigma2*np.linalg.inv(self.X.T.dot(self.X)))
-        return self.var_of_beta
+        n, p = self.X.shape # dimensions
+        if((n-p)==1):
+            n = n+1 # avoid dividing by zero
+        var_hat = 1./(n-p-1)*np.sum((self.z-self.ztilde)**2)
+        return np.diagonal(var_hat*np.linalg.pinv(self.X.T.dot(self.X)))
 
-    def sigma2(self):
-        '''Finds the variance of z.'''
+    def sigma2(self,z):
+        '''Finds the variance of z.''' 
+        return np.sum((z-np.mean(z))**2)/(np.size(z)-1)
+
+    def get_beta_CIs(self,confidence):
         if not self.is_regressed:
-            self.regress()
-        self.sigma_squared = np.sum((self.z-np.mean(self.z))**2)/(np.size(z)-1)
+            warnings.warn("Call model.fit(X,z) first to create beta values")
+            return
 
-        return self.sigma_squared
+        if(self.n<40):
+            warnings.warn("The expression used for calculating the confidence interval of beta is valid for large samples. You may get inaccurate results.")
+
+        if(confidence>1): # confidence given as a percentage, not a fraction
+            confidence = confidence/100.
+        
+        std_beta = np.sqrt(self.variance_of_beta())
+        bound = scipy.stats.t.ppf((1+confidence)/2.,np.size(self.beta)-1)*std_beta
+        
+        # I dont have mean(beta_i), using found value beta_i under the assumption it is the expectation value of beta
+        lower = self.beta-bound
+        upper = self.beta+bound
+        return np.vstack([lower,upper]).T
 
 
 
