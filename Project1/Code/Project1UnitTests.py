@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
 from CreateData import *
 from OrdinaryLeastSquares import *
 
@@ -44,10 +45,31 @@ class OrdinaryLeastSquaresTest(unittest.TestCase):
         self.assertEqual(self.ols.z.all(),self.data.z.all(), 'error in stored z values')
         self.assertFalse(self.ols.is_regressed, 'is_regressed not set to False at initialization')
 
-    def test_regress(self):
-        self.ols.regress()
+    def test_regression(self):
+        self.ols.fit()
         lin_model = LinearRegression() # OLS
         lin_model.fit(self.data.X, self.data.z)
-        z_predict = lin_model.predict(self.data.X)
-        self.assertTrue(np.allclose(self.ols.ztilde,z_predict), 'ols regression result differs from sklearn')
+        ztilde_skl = lin_model.predict(self.data.X)
+        self.assertTrue(np.allclose(self.ols.ztilde,ztilde_skl), 'ols regression fit result differs from sklearn')
+        self.assertTrue(self.ols.is_regressed, 'is_regressed not set to True after .fit() is called')
+
+        new_data = CreateData(self.n)
+        new_data.create_design_matrix(2)
+        z_predict = self.ols.predict(new_data.X)
+        z_predict_skl = lin_model.predict(new_data.X)
+        self.assertTrue(np.allclose(z_predict,z_predict_skl), 'ols regression predict result differs from sklearn')
+    
+    def test_error_measures(self):
+        self.ols.fit()
+        ols_mean = self.ols.mean(self.ols.z)
+        ols_r2 = self.ols.r2(self.ols.ztilde,self.ols.z)
+        ols_mse = self.ols.mean_square_error()
+
+        mean = np.mean(self.ols.z)
+        r2 = r2_score(self.ols.ztilde,self.ols.z)
+        mse = mean_squared_error(self.ols.ztilde,self.ols.z)
+
+        self.assertEqual(ols_mean,mean,'mean differs from numpy value')
+        self.assertEqual(ols_r2,r2,'r2 score differs from sklearn value')
+        self.assertEqual(ols_mse,mse,'mse differs from sklearn value')
         

@@ -13,9 +13,10 @@ class CreateData:
     def __init__(self,n,seed=9):
         np.random.seed(seed=seed)
         self.n = n
-        self.x = np.random.rand(n)#np.linspace(0,1,self.n)
-        self.y = np.random.rand(n)#np.linspace(0,1,self.n)
+        self.x = np.random.rand(n)
+        self.y = np.random.rand(n)
         self.z = self.calculate_values(self.x,self.y)
+        self.split = False # (dataset not split into train and test)
 
     def calculate_values(self,x,y):
         term1 = 0.75*np.exp(-(0.25*(9*x-2)**2) - 0.25*((9*y-2)**2))
@@ -46,8 +47,6 @@ class CreateData:
         d     - the polynomial degree 
         return the design matrix X
         '''
-
-    
         p = int((d+1)*(d+2)/2)  # number of terms in the resulting polynomial                                                              
         self.X = np.ones((self.n,p))      # X has dimensionality nxp
 
@@ -66,8 +65,9 @@ class CreateData:
 
         test    - fraction of the dataset used for test
         '''
-        self.X_train, self.X_test, self.z_train, self.z_test = train_test_split(self.X, self.y, test_size = test, random_state=3)
+        self.X_train, self.X_test, self.z_train, self.z_test = train_test_split(self.X, self.z, test_size = test, random_state=3)
         #return train, validate, test = np.split(df.sample(frac=1), [int(.6*len(df)), int(.8*len(df))])
+        self.split = True
         return self.X_train, self.X_test, self.z_train, self.z_test
 
     def scale_dataset(self,type='standard'):
@@ -78,17 +78,32 @@ class CreateData:
         minmax:     sklearn.MinMaxScaler
         '''
         self.scaling = type.lower()
-        if(self.scaling=='standard'):
-            # removing the mean and scaling to unit variance
-            scaler = StandardScaler()
-            scaler.fit(self.X_train)
-            self.X_train_scaled = scaler.transform(self.X_train)    # Fit to training data
-            self.X_test_scaled = scaler.transform(self.X_test)      # use same fit when scaling test data
+        if(self.split):
+            if(self.scaling=='standard'):
+                # removing the mean and scaling to unit variance
+                scaler = StandardScaler()
+                scaler.fit(self.X_train[:,1:])
+                X_train_scaled = scaler.transform(self.X_train[:,1:])    # Fit to training data
+                X_test_scaled = scaler.transform(self.X_test[:,1:])      # use same fit when scaling test data
+                self.X_test = np.hstack((np.ones((self.X_test.shape[0],1)),X_test_scaled))
+                self.X_train = np.hstack((np.ones((self.X_train.shape[0],1)),X_train_scaled))
 
-        elif(self.scaling=='minmax'):
-            # Scaling to lie between 0 and 1
-            min_max_scaler = MinMaxScaler()
-            self.X_train_scaled = min_max_scaler.fit_transform(self.X_train) # Fit to training data
-            self.X_test_scaled = min_max_scaler.transform(self.X_test)       # use same fit when scaling test data
+            elif(self.scaling=='minmax'):
+                # Scaling to lie between 0 and 1
+                min_max_scaler = MinMaxScaler()
+                self.X_train = min_max_scaler.fit_transform(self.X_train) # Fit to training data
+                self.X_test = min_max_scaler.transform(self.X_test)       # use same fit when scaling test data
 
-
+        else:
+            if(self.scaling=='standard'):
+                scaler = StandardScaler()
+                scaler.fit(self.X[:,1:])
+                X_scaled = scaler.transform(self.X[:,1:])
+                self.X_test = np.hstack((np.ones((self.X.shape[0],1)),X_scaled))
+            
+            elif(self.scaling=='minmax'):
+                # Scaling to lie between 0 and 1
+                min_max_scaler = MinMaxScaler()
+                self.X = min_max_scaler.fit_transform(self.X)
+                
+    
