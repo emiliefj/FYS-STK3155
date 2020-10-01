@@ -3,6 +3,7 @@ from numpy.random import randint
 import warnings
 import scipy.stats
 from sklearn.utils import resample
+import random
 
 # import CreateData as cd
 
@@ -43,8 +44,8 @@ class OrdinaryLeastSquares:
        
         return self.ztilde
 
-    def predict(self,input):
-        return input.dot(self.beta)
+    def predict(self,input_data):
+        return input_data.dot(self.beta)
 
     def bootstrap(self,B,statistic):
         ''' Finding a better estimate for a statistic
@@ -63,7 +64,65 @@ class OrdinaryLeastSquares:
 
         return theta
 
-    def bootstrap_fit(self,data_creator,B,max_degree,n=100):
+    def k_fold_cv(self,input_data,target,k=5, shuffle=True):
+        ''' resampling using k-fold cross validation
+
+        input_data  - input data
+        target      - target data
+        k           - The number of folds
+        shuffle     - if True the dataset is shuffled before 
+                      splitting into folds
+        returns the average of the mean square errors found when predicting the test fold
+        '''
+        indices = np.array(range(0,input_data.shape[0]))
+        if(shuffle): # shuffle data before split
+            indices = random.sample(range(0,input_data.shape[0]), input_data.shape[0])
+
+        folds = np.array_split(indices, k)
+
+        mse = np.zeros(k)
+        for i in range(k):
+            train = folds.copy()
+            test = train[i]
+            del train[i]
+            train = np.concatenate(train)
+            self.fit(input_data[train],target[train])
+            target_hat = self.predict(input_data[test])
+            mse[i] = self.mean_square_error(target_hat,target[test])
+
+        return np.mean(mse)
+
+    def bootstrap_fit(self,input_data,target,B=100,test_fraction=0.25): # maybe move loop over d out?
+        ''' Resampling using the bootstrap method
+
+        input_data  - input data
+        target      - target data
+        B           - The number of bootstraps
+        test_fraction   - the fraction of the data used for test
+
+        returns the average mse when predicting the test set in each of 
+        the B bootstraps
+        '''
+        # Leaving a fraction of the data for test
+        test_indices = random.sample(range(0,input_data.shape[0]), int(input_data.shape[0]*test_fraction))
+        input_test = input_data[test_indices]
+        input_data = np.array(np.delete(input_data,test_indices,0))
+        target_test = target[test_indices]
+        target = np.array(np.delete(target,test_indices,0)) #np.setdiff1d(target,target_test)
+
+        mse_train = np.zeros((B))
+        mse_test = np.zeros((B))
+        for b in range(B):
+            #indices = random.choices(range(0,input_data.shape[0]), input_data.shape[0])
+            X_, z_ = resample(input_data, target)       # shuffle data, with replacement
+            self.fit(X_,z_) # fit model
+            # prediction on same test data every time
+            mse_train[b] = self.mean_square_error(self.predict(X_),z_)
+            mse_test[b] = self.mean_square_error(self.predict(input_test),target_test)
+
+        return np.mean(mse_test),np.mean(mse_train)
+
+    def bootstrap_fit_loop(self,data_creator,B=100,max_degree=10,n=100): # maybe move loop over d out?
         ''' Resampling using the bootstrap method
 
         data_creator- class for creating data
@@ -95,7 +154,6 @@ class OrdinaryLeastSquares:
                 self.fit(X_,z_)                         # fit to shuffled data
 
                 # prediction on same test data every time
-                #print(z_test-self.predict(test_data.X))
                 mse_train[d,i] = self.mean_square_error(self.predict(X_),z_)
                 mse_test[d,i] = self.mean_square_error(self.predict(test_data.X),z_test)
             avg_mse_test[d] = np.mean(mse_test[d,:])
@@ -104,9 +162,6 @@ class OrdinaryLeastSquares:
 
         return avg_mse_test, avg_mse_train
 
-    def k_fold_cv(self):
-        pass
-    
     def mean_square_error(self,z_prediction=None,z_actual=None):
         ''' Returns the Mean Square Error '''
         if z_prediction is None:
@@ -127,7 +182,7 @@ class OrdinaryLeastSquares:
 
     def mean(self,z):
         ''' Returns the mean of the values of the array z.'''
-        return np.sum(z)/self.n
+        return np.sum(z)/np.size(z)
 
     def variance_of_beta(self):
         '''Finds the variance for the parameters beta.'''
