@@ -15,6 +15,9 @@ class CreateData:
         self.n = n
         self.x = np.random.rand(n)
         self.y = np.random.rand(n)
+        # x, y = np.meshgrid(x, y)
+        # self.x = np.ravel(x)
+        # self.y = np.ravel(y)
         self.z = self.calculate_values(self.x,self.y)
         self.split = False # (dataset not split into train and test)
 
@@ -99,8 +102,8 @@ class CreateData:
                 scaler = StandardScaler()
                 scaler.fit(self.X[:,1:])
                 X_scaled = scaler.transform(self.X[:,1:])
-                self.X_test = np.hstack((np.ones((self.X.shape[0],1)),X_scaled))
-            
+                self.X = np.hstack((np.ones((self.X.shape[0],1)),X_scaled))
+
             elif(self.scaling=='minmax'):
                 # Scaling to lie between 0 and 1
                 min_max_scaler = MinMaxScaler()

@@ -2,6 +2,9 @@ import numpy as np
 from numpy.random import randint
 import warnings
 import scipy.stats
+from sklearn.utils import resample
+
+# import CreateData as cd
 
 class OrdinaryLeastSquares:
     ''' Perform OLS regression and assess performance.
@@ -44,7 +47,8 @@ class OrdinaryLeastSquares:
         return input.dot(self.beta)
 
     def bootstrap(self,B,statistic):
-        '''Resampling using the bootstrap method
+        ''' Finding a better estimate for a statistic
+        theta using the bootstrap method
 
         Calculates an estimate for the statistic given as input,
         on the data z.
@@ -59,7 +63,50 @@ class OrdinaryLeastSquares:
 
         return theta
 
+    def bootstrap_fit(self,data_creator,B,max_degree,n=100):
+        ''' Resampling using the bootstrap method
 
+        data_creator- class for creating data
+        B           - Number of bootstraps
+        max_degree  - max polynomial degrees
+        n           - number of datapoints in training set for
+                      the models
+        returns an array of dimensions (max_degree,B) with 
+        z-predictions for each model variation on the same test set
+        '''
+        test_data = data_creator.CreateData(n) # Create test data
+        z_test = test_data.z
+
+        data = data_creator.CreateData(n)              # Create data for model fit
+        mse_test = np.zeros((max_degree,B))            # For storing results
+        mse_train = np.zeros((max_degree,B)) 
+        avg_mse_train = np.zeros(max_degree)
+        avg_mse_test = np.zeros(max_degree)
+        print("--- Mean square error on static test set for B=%d bootstraps. ---" %(B))
+        for d in range(max_degree):
+            test_data.create_design_matrix(d+1)         # Building design matrix with test data
+            test_data.scale_dataset() # Not scaled the same as test set - uh oh
+            data.create_design_matrix(d+1)              # Building design matrix for model fit
+            data.scale_dataset()
+
+            mse_train
+            for i in range(B):
+                X_, z_ = resample(data.X, data.z)       # shuffle data, with replacement
+                self.fit(X_,z_)                         # fit to shuffled data
+
+                # prediction on same test data every time
+                #print(z_test-self.predict(test_data.X))
+                mse_train[d,i] = self.mean_square_error(self.predict(X_),z_)
+                mse_test[d,i] = self.mean_square_error(self.predict(test_data.X),z_test)
+            avg_mse_test[d] = np.mean(mse_test[d,:])
+            avg_mse_train[d] = np.mean(mse_train[d,:])
+            print(f"d=%d: MSE(test set): %f " %(d+1,avg_mse_test[d]))
+
+        return avg_mse_test, avg_mse_train
+
+    def k_fold_cv(self):
+        pass
+    
     def mean_square_error(self,z_prediction=None,z_actual=None):
         ''' Returns the Mean Square Error '''
         if z_prediction is None:
