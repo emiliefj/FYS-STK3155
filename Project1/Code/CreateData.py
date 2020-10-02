@@ -85,9 +85,9 @@ class CreateData:
             if(self.scaling=='standard'):
                 # removing the mean and scaling to unit variance
                 scaler = StandardScaler()
-                scaler.fit(self.X_train[:,1:])
-                X_train_scaled = scaler.transform(self.X_train[:,1:])    # Fit to training data
-                X_test_scaled = scaler.transform(self.X_test[:,1:])      # use same fit when scaling test data
+                scaler.fit(self.X_train[:,1:])                          # Fit to training data
+                X_train_scaled = scaler.transform(self.X_train[:,1:])    
+                X_test_scaled = scaler.transform(self.X_test[:,1:])     # use same fit when scaling test data
                 self.X_test = np.hstack((np.ones((self.X_test.shape[0],1)),X_test_scaled))
                 self.X_train = np.hstack((np.ones((self.X_train.shape[0],1)),X_train_scaled))
 

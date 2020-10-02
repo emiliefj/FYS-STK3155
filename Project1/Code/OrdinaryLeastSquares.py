@@ -17,8 +17,8 @@ class OrdinaryLeastSquares:
     - Bootstrap
     '''
 
-    def __init__(self):
-        
+    def __init__(self,seed):
+        np.random.seed(seed=seed)        
         self.is_regressed = False
         # self.beta = np.linalg.inv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
         # z_prediction = self.X.dot(beta)
@@ -92,7 +92,30 @@ class OrdinaryLeastSquares:
 
         return np.mean(mse)
 
-    def bootstrap_fit(self,input_data,target,B=100,test_fraction=0.25): # maybe move loop over d out?
+    def bootstrap_fit(self,train_data,train_target,test_data,test_target,B=100): 
+        ''' Resampling using the bootstrap method
+
+        train_data      - input data used for fit
+        train_target    - target data used for fit
+        test_data       - input data used for test
+        test_target     - target data used for test
+        B               - The number of bootstraps
+
+        returns the average mse when predicting the test set in each of 
+        the B bootstraps
+        '''
+        mse_train = np.zeros((B))
+        mse_test = np.zeros((B))
+        for b in range(B):
+            X_, z_ = resample(train_data, train_target)       # shuffle data, with replacement
+            self.fit(X_,z_) # fit model
+            # prediction on same test data every time
+            mse_train[b] = self.mean_square_error(self.predict(X_),z_)
+            mse_test[b] = self.mean_square_error(self.predict(test_data),test_target)
+
+        return np.mean(mse_test),np.mean(mse_train)
+
+    def bootstrap_fit_old(self,input_data,target,B=100,test_fraction=0.25):
         ''' Resampling using the bootstrap method
 
         input_data  - input data
@@ -136,8 +159,10 @@ class OrdinaryLeastSquares:
         test_data = data_creator.CreateData(n) # Create test data
         z_test = test_data.z
 
-        data = data_creator.CreateData(n)              # Create data for model fit
-        mse_test = np.zeros((max_degree,B))            # For storing results
+        # Create data for model fit
+        data = data_creator.CreateData(n)
+        # For storing results
+        mse_test = np.zeros((max_degree,B))
         mse_train = np.zeros((max_degree,B)) 
         avg_mse_train = np.zeros(max_degree)
         avg_mse_test = np.zeros(max_degree)
