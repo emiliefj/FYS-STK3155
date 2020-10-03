@@ -5,8 +5,6 @@ import scipy.stats
 from sklearn.utils import resample
 import random
 
-# import CreateData as cd
-
 class OrdinaryLeastSquares:
     ''' Perform OLS regression and assess performance.
 
@@ -17,22 +15,20 @@ class OrdinaryLeastSquares:
     - Bootstrap
     '''
 
-    def __init__(self,seed):
-        np.random.seed(seed=seed)        
+    def __init__(self):       
         self.is_regressed = False
         # self.beta = np.linalg.inv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
         # z_prediction = self.X.dot(beta)
 
     def fit(self,X,z):
         ''' Regression using Ordinary Least Squares.
+        Finds beta, the parameters or weights of the fit and finds
+        the prediction for z, ztilde
 
         X      - The design matrix
         z      - The output vars
-        beta   - The parameters beta
-        ztilde - The prediction for z
+        returns ztilde, the prediction for z.
         '''
-        # Include this in constructor instead of own method? Assures ztilde 
-        # and beta are created when calling other methods
 
         self.X = X
         self.z = z
@@ -65,6 +61,7 @@ class OrdinaryLeastSquares:
         return theta
 
     def k_fold_cv(self,input_data,target,k=5, shuffle=True):
+        random.seed(463)
         ''' resampling using k-fold cross validation
 
         input_data  - input data
@@ -127,6 +124,7 @@ class OrdinaryLeastSquares:
         the B bootstraps
         '''
         # Leaving a fraction of the data for test
+        random.seed(133)
         test_indices = random.sample(range(0,input_data.shape[0]), int(input_data.shape[0]*test_fraction))
         input_test = input_data[test_indices]
         input_data = np.array(np.delete(input_data,test_indices,0))
@@ -137,7 +135,7 @@ class OrdinaryLeastSquares:
         mse_test = np.zeros((B))
         for b in range(B):
             #indices = random.choices(range(0,input_data.shape[0]), input_data.shape[0])
-            X_, z_ = resample(input_data, target)       # shuffle data, with replacement
+            X_, z_ = resample(input_data, target,random_state=13)       # shuffle data, with replacement
             self.fit(X_,z_) # fit model
             # prediction on same test data every time
             mse_train[b] = self.mean_square_error(self.predict(X_),z_)
@@ -175,7 +173,7 @@ class OrdinaryLeastSquares:
 
             mse_train
             for i in range(B):
-                X_, z_ = resample(data.X, data.z)       # shuffle data, with replacement
+                X_, z_ = resample(data.X, data.z, random_state=13)       # shuffle data, with replacement
                 self.fit(X_,z_)                         # fit to shuffled data
 
                 # prediction on same test data every time
