@@ -11,23 +11,33 @@ class CreateDataTest(unittest.TestCase):
         self.data = CreateData(self.n)
 
         self.z = np.array([0.76642059, 1.16528332, 0.32576209, 0.1159698 , 0.03586959])
+        self.z_mesh = np.array([[0.76642059, 0.81885368, 0.43491424, 0.25206195, 0.10755755],
+                                [0.80258259, 1.16528332, 0.53811211, 0.58935857, 0.23021761],
+                                [0.48180615, 0.50456938, 0.32576209, 0.40804792, 0.16102556],
+                                [0.33952742, 0.27241325, 0.04371943, 0.1159698,  0.05036027],
+                                [0.27033716, 0.22224008, 0.14597916, 0.08104742, 0.03586959]])
 
     def test_size_generated_values(self):
-        self.assertEqual(np.size(self.data.x),self.n,'x in CreateData has wrong size')
-        self.assertEqual(np.size(self.data.y),self.n,'y in CreateData has wrong size')
-        self.assertEqual(np.size(self.data.z),self.n,'z in CreateData has wrong size')
+        self.assertEqual(self.data.x_mesh.shape,(self.n,self.n),'x_mesh in CreateData has wrong shape')
+        self.assertEqual(self.data.y_mesh.shape,(self.n,self.n),'y_mesh in CreateData has wrong shape')
+        self.assertEqual(self.data.z_mesh.shape,(self.n,self.n),'z_mesh in CreateData has wrong shape')
+
+    def test_x_y_values(self):
+        self.assertTrue((self.data.x_mesh>=0).all() and (self.data.x_mesh<=1).all(),'generated x-values outside range (0,1)')
+        self.assertTrue((self.data.y_mesh>=0).all() and (self.data.y_mesh<=1).all(),'generated y-values outside range (0,1)')
 
     def test_z_values(self):
         #new_data = CreateData(5)
         x = np.linspace(0,1,5)
         y = np.linspace(0,1,5)
-        z = self.data.calculate_values(x,y)
-        self.assertTrue(np.allclose(z,self.z),'wrong values calculated for Franke function')
+        x_mesh, y_mesh = np.meshgrid(x, y)
+        z_mesh = self.data.calculate_values(x_mesh,y_mesh)
+        self.assertTrue(np.allclose(z_mesh,self.z_mesh),'wrong values calculated for Franke function')
 
     def test_add_noise(self):
-        z_no_noise = self.data.z
+        z_no_noise = self.data.z_mesh
         self.data.add_normal_noise(0,0.01)
-        z_with_noise = self.data.z
+        z_with_noise = self.data.z_mesh
         self.assertFalse(np.allclose(z_no_noise,z_with_noise),'arrays are equal after adding noise')
         self.assertTrue(np.allclose(z_no_noise,z_with_noise,atol=0.05),'arrays too dissimilar after adding noise')
         
@@ -73,3 +83,5 @@ class OrdinaryLeastSquaresTest(unittest.TestCase):
         self.assertEqual(ols_r2,r2,'r2 score differs from sklearn value')
         self.assertEqual(ols_mse,mse,'mse differs from sklearn value')
         
+# if __name__ == "__main__":
+#     unittest.main()
