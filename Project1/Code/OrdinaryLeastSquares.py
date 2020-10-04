@@ -15,7 +15,7 @@ class OrdinaryLeastSquares:
     - Bootstrap
     '''
 
-    def __init__(self):       
+    def __init__(self,seed=199):       
         self.is_regressed = False
         # self.beta = np.linalg.inv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
         # z_prediction = self.X.dot(beta)
@@ -41,6 +41,10 @@ class OrdinaryLeastSquares:
         return self.ztilde
 
     def predict(self,input_data):
+        ''' Making a prediction for the output using the regression model found in fit() '''
+        if not self.is_regressed:
+            warnings.warn('Call .fit()-method first to create model with training data.')
+            return
         return input_data.dot(self.beta)
 
     def bootstrap(self,B,statistic):
@@ -61,7 +65,6 @@ class OrdinaryLeastSquares:
         return theta
 
     def k_fold_cv(self,input_data,target,k=5, shuffle=True):
-        random.seed(463)
         ''' resampling using k-fold cross validation
 
         input_data  - input data
