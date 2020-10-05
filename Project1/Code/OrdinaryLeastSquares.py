@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.random import randint
 import warnings
 import scipy.stats
 from sklearn.utils import resample
@@ -15,10 +14,9 @@ class OrdinaryLeastSquares:
     - Bootstrap
     '''
 
-    def __init__(self,seed=199):       
+    def __init__(self,seed=199):
+        random.seed(seed)     
         self.is_regressed = False
-        # self.beta = np.linalg.inv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
-        # z_prediction = self.X.dot(beta)
 
     def fit(self,X,z):
         ''' Regression using Ordinary Least Squares.
@@ -36,6 +34,7 @@ class OrdinaryLeastSquares:
         
         self.beta = np.linalg.pinv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
         self.ztilde = self.X.dot(self.beta)
+        
         self.is_regressed = True
        
         return self.ztilde
@@ -49,7 +48,7 @@ class OrdinaryLeastSquares:
 
     def bootstrap(self,B,statistic):
         ''' Finding a better estimate for a statistic
-        theta using the bootstrap method
+        theta using the bootstrap method.
 
         Calculates an estimate for the statistic given as input,
         on the data z.
@@ -58,14 +57,16 @@ class OrdinaryLeastSquares:
         statistic - the statistic to be estimated (a method)
         returns an array of the calculated theta values
         '''
+        rng = np.random.default_rng()
         theta = zeros(B)
         for i in range(B):
-            theta[i] = statistic(z[randint(0,self.n,self.n)]) # Randomly select n vars from z
+            theta[i] = statistic(z[rng.integers(0,self.n,self.n)])  # Randomly select n vars from z
+                                                                    # with replacement
 
         return theta
 
     def k_fold_cv(self,input_data,target,k=5, shuffle=True):
-        ''' resampling using k-fold cross validation
+        ''' Resampling using k-fold cross validation
 
         input_data  - input data
         target      - target data
@@ -74,9 +75,10 @@ class OrdinaryLeastSquares:
                       splitting into folds
         returns the average of the mean square errors found when predicting the test fold
         '''
-        indices = np.array(range(0,input_data.shape[0]))
+        n = input_data.shape[0]
+        indices = np.array(range(0,n))
         if(shuffle): # shuffle data before split
-            indices = random.sample(range(0,input_data.shape[0]), input_data.shape[0])
+            indices = random.sample(range(0,n), n)
 
         folds = np.array_split(indices, k)
 
@@ -127,7 +129,6 @@ class OrdinaryLeastSquares:
         the B bootstraps
         '''
         # Leaving a fraction of the data for test
-        random.seed(133)
         test_indices = random.sample(range(0,input_data.shape[0]), int(input_data.shape[0]*test_fraction))
         input_test = input_data[test_indices]
         input_data = np.array(np.delete(input_data,test_indices,0))
@@ -198,7 +199,7 @@ class OrdinaryLeastSquares:
         return np.sum((z_actual-z_prediction)**2)/self.n
 
     def r2(self,z_prediction=None,z_actual=None):
-        '''Returns the R**2 value for z.'''
+        '''Returns the r^2 value for z.'''
         if z_prediction is None:
             z_prediction = self.ztilde
         if z_actual is None:
@@ -210,7 +211,7 @@ class OrdinaryLeastSquares:
         ''' Returns the mean of the values of the array z.'''
         return np.sum(z)/np.size(z)
 
-    def variance_of_beta(self):
+    def variance_of_beta(self): # Make private? __variance_of_beta(self)
         '''Finds the variance for the parameters beta.'''
         n, p = self.X.shape # dimensions
         if((n-p)==1):
