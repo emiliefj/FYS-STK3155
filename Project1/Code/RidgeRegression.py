@@ -59,4 +59,26 @@ class RidgeRegression(OLS.OrdinaryLeastSquares):
             r2[i] = self.r2(target_hat,target[test])
 
         return np.mean(mse), np.mean(r2)
-        
+
+    def bootstrap_fit(self,train_data,train_target,test_data,test_target,B=100,alpha=0.1): 
+        ''' Resampling using the bootstrap method
+
+        train_data      - input data used for fit
+        train_target    - target data used for fit
+        test_data       - input data used for test
+        test_target     - target data used for test
+        B               - The number of bootstraps
+
+        returns the average mse when predicting the test set in each of 
+        the B bootstraps
+        '''
+        mse_train = np.zeros((B))
+        mse_test = np.zeros((B))
+        for b in range(B):
+            X_, z_ = resample(train_data, train_target)       # shuffle data, with replacement
+            self.fit(X_,z_,alpha=alpha) # fit model
+            # prediction on same test data every time
+            mse_train[b] = self.mean_square_error(self.predict(X_),z_)
+            mse_test[b] = self.mean_square_error(self.predict(test_data),test_target)
+
+        return np.mean(mse_test),np.mean(mse_train)
