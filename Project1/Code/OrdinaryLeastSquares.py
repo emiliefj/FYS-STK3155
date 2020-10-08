@@ -32,7 +32,7 @@ class OrdinaryLeastSquares:
         self.z = z
         self.n = np.size(z)
         
-        self.beta = np.linalg.pinv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
+        self.beta= np.linalg.pinv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
         self.ztilde = self.X.dot(self.beta)
         
         self.is_regressed = True
@@ -196,7 +196,7 @@ class OrdinaryLeastSquares:
         if z_actual is None:
             z_actual = self.z
 
-        return np.sum((z_actual-z_prediction)**2)/self.n
+        return np.sum((z_actual-z_prediction)**2)/len(z_actual)
 
     def r2(self,z_prediction=None,z_actual=None):
         '''Returns the r^2 value for z.'''

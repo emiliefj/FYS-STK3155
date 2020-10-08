@@ -47,6 +47,7 @@ class RidgeRegression(OLS.OrdinaryLeastSquares):
         folds = np.array_split(indices, k)
 
         mse = np.zeros(k)
+        r2 = np.zeros(k)
         for i in range(k):
             train = folds.copy()
             test = train[i]
@@ -55,5 +56,7 @@ class RidgeRegression(OLS.OrdinaryLeastSquares):
             self.fit(input_data[train],target[train],alpha)
             target_hat = self.predict(input_data[test])
             mse[i] = self.mean_square_error(target_hat,target[test])
+            r2[i] = self.r2(target_hat,target[test])
 
-        return np.mean(mse)
+        return np.mean(mse), np.mean(r2)
+        

@@ -74,7 +74,7 @@ class CreateData:
         self.X = create_matrix(x,y,d)
         return self.X
 
-    def plot_data(self, X=None,z=None):
+    def plot_data(self,zmin=-0.1,zmax=1.4,X=None,z=None,bar=True,show=True):
         fig = plt.figure()
         ax = fig.gca(projection='3d')
 
@@ -91,14 +91,15 @@ class CreateData:
                         linewidth=0, antialiased=False)
 
         # Customize the z axis.
-        #ax.set_zlim(-0.10, 1.40)
+        ax.set_zlim(zmin, zmax)
         #ax.zaxis.set_major_locator(LinearLocator(10))
-        #ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+        ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
         
-        # Add a color bar which maps values to colors.
-        fig.colorbar(surf, shrink=0.5, aspect=5)
-        
-        plt.show()
+        if bar:
+            # Add a color bar which maps values to colors.
+            fig.colorbar(surf, shrink=0.5, aspect=5)
+        if show:
+            plt.show()
 
     def split_dataset(self,test):
         '''
