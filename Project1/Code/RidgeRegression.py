@@ -21,9 +21,9 @@ class RidgeRegression(OLS.OrdinaryLeastSquares):
         self.X = X
         self.z = z
         self.n = np.size(z)
-        
+        self.alpha = alpha
         p = self.X.shape[1]
-        self.beta = np.linalg.pinv(self.X.T.dot(self.X)+alpha*np.eye(p,p)).dot(self.X.T).dot(self.z)
+        self.beta = np.linalg.pinv(self.X.T.dot(self.X)+self.alpha*np.eye(p,p)).dot(self.X.T).dot(self.z)
         self.ztilde = self.X.dot(self.beta)
         self.is_regressed = True
        
@@ -82,3 +82,12 @@ class RidgeRegression(OLS.OrdinaryLeastSquares):
             mse_test[b] = self.mean_square_error(self.predict(test_data),test_target)
 
         return np.mean(mse_test),np.mean(mse_train)
+
+    def variance_of_beta(self):
+        '''Finds the variance for the parameters beta.'''
+        n, p = self.X.shape # dimensions
+        if((n-p)==1):
+            n = n+1 # avoid dividing by zero
+        var_hat = 1./(n-p-1)*np.sum((self.z-self.ztilde)**2)
+        xtx_alphaI = np.linalg.pinv(self.X.T.dot(self.X)-self.alpha*np.eye(p,p))
+        return np.diagonal(var_hat*xtx_alphaI.dot(self.X.T).dot(self.X).dot((xtx_alphaI).T))
