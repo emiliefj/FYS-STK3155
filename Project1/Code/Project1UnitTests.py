@@ -31,7 +31,7 @@ class CreateDataTest(unittest.TestCase):
         x = np.linspace(0,1,5)
         y = np.linspace(0,1,5)
         x_mesh, y_mesh = np.meshgrid(x, y)
-        z_mesh = self.data.calculate_values(x_mesh,y_mesh)
+        z_mesh = self.data.calculate_franke_values(x_mesh,y_mesh)
         self.assertTrue(np.allclose(z_mesh,self.z_mesh),'wrong values calculated for Franke function')
 
     def test_add_noise(self):
@@ -48,17 +48,16 @@ class OrdinaryLeastSquaresTest(unittest.TestCase):
         self.n = 10
         self.data = CreateData(self.n)
         self.data.create_design_matrix(2)
-        self.ols = OrdinaryLeastSquares(self.data.X, self.data.z)
+        self.ols = OrdinaryLeastSquares()
 
     def test_init(self):
-        self.assertEqual(self.ols.X.all(),self.data.X.all(), 'error in stored design matrix')
-        self.assertEqual(self.ols.z.all(),self.data.z.all(), 'error in stored z values')
         self.assertFalse(self.ols.is_regressed, 'is_regressed not set to False at initialization')
+        
 
     def test_regression(self):
-        self.ols.fit()
+        self.ols.fit(self.data.X,np.ravel(self.data.z_mesh))
         lin_model = LinearRegression() # OLS
-        lin_model.fit(self.data.X, self.data.z)
+        lin_model.fit(self.data.X, np.ravel(self.data.z_mesh))
         ztilde_skl = lin_model.predict(self.data.X)
         self.assertTrue(np.allclose(self.ols.ztilde,ztilde_skl), 'ols regression fit result differs from sklearn')
         self.assertTrue(self.ols.is_regressed, 'is_regressed not set to True after .fit() is called')
@@ -70,7 +69,8 @@ class OrdinaryLeastSquaresTest(unittest.TestCase):
         self.assertTrue(np.allclose(z_predict,z_predict_skl), 'ols regression predict result differs from sklearn')
     
     def test_error_measures(self):
-        self.ols.fit()
+        self.ols.fit(self.data.X,np.ravel(self.data.z_mesh))
+
         ols_mean = self.ols.mean(self.ols.z)
         ols_r2 = self.ols.r2(self.ols.ztilde,self.ols.z)
         ols_mse = self.ols.mean_square_error()
@@ -83,5 +83,9 @@ class OrdinaryLeastSquaresTest(unittest.TestCase):
         self.assertEqual(ols_r2,r2,'r2 score differs from sklearn value')
         self.assertEqual(ols_mse,mse,'mse differs from sklearn value')
         
-# if __name__ == "__main__":
-#     unittest.main()
+if __name__ == "__main__":
+    unittest.main()
+
+        #     self.assertEqual(self.ols.X.all(),self.data.X.all(), 'error in stored design matrix')
+        # self.assertEqual(self.ols.z.all(),self.data.z_mesh.all(), 'error in stored z values')
+        # self.assertFalse(self.ols.is_regressed, 'is_regressed not set to False at initialization')
