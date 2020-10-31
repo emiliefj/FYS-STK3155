@@ -14,7 +14,7 @@ class LinearRegressionwithGradientDescent:
     - Bootstrap
     '''
 
-    def __init__(self,seed=199, method="ols",alpha=0, n_epochs=10, batchsize=1, learning_rate=0.01, max_iter=1000):
+    def __init__(self,seed=199, method="ols", alpha=0, n_epochs=10, batchsize=1, learning_rate=0.01, max_iter=1000, decay=False, t0=1.0, t1=10):
         random.seed(seed)
         self.method = method.lower()
         self.alpha = alpha # aka lambda 
@@ -22,6 +22,9 @@ class LinearRegressionwithGradientDescent:
         self.batchsize = batchsize
         self.learning_rate = learning_rate
         self.max_iter = max_iter
+        self.decay = decay
+        self.t0 = t0
+        self.t1 = t1
 
         self.is_regressed = False
 
@@ -48,14 +51,15 @@ class LinearRegressionwithGradientDescent:
        
         return self.ztilde
 
-    def findBetas():
+    def findBetas(self):
         if self.method=="ols":
             return np.linalg.pinv(self.X.T.dot(self.X)).dot(self.X.T).dot(self.z)
 
         if self.method=="sgd":
             return self.sgd()
 
-    def sgd():
+
+    def sgd(self):
         n_batches = int(len(self.X)/self.batchsize)
         beta_0 = np.random.randn(len(self.X[0]),1) # Make initial guess for beta
         for i in range(0,self.n_epochs):
@@ -63,11 +67,17 @@ class LinearRegressionwithGradientDescent:
                 # fetch X and y of current mini-batch
                 batch = np.random.randint(self.n,size=self.batchsize)
                 current_X = self.X[batch]
-                current_y = self.y[batch]
+                current_z = self.z[batch]
                 # calculate gradient
-                gradient = current_X.T.dot(current_X.dot(beta_0)-current_y)-self.alpha.dot(beta_0)*2/self.batchsize
-                beta_0 = beta_0-learning_rate*gradient
+                gradient = current_X.T.dot(current_X.dot(beta_0)-current_z)-self.alpha*(beta_0)*2/self.batchsize
+                beta_0 = beta_0-self.learning_schedule(i*n_batches+b)*gradient
         return beta_0
+
+    def learning_schedule(self,t):
+        if self.decay:
+            return self.t0/(t+self.t1)
+        else:
+            return self.learning_rate
 
     def predict(self,input_data):
         ''' Making a prediction for the output using the regression model found in fit() '''
