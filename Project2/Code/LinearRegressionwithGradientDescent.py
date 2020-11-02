@@ -3,6 +3,7 @@ import warnings
 import scipy.stats
 from sklearn.utils import resample
 import random
+import pandas as pd
 
 class LinearRegressionwithGradientDescent:
     ''' Perform linear regression and assess performance.
@@ -40,7 +41,7 @@ class LinearRegressionwithGradientDescent:
 
         self.X = X
         self.z = z
-        self.n = np.size(z)
+        self.n = len(X)
 
         #self.n = len(X)
         #self.p = len(X[0])
@@ -65,12 +66,16 @@ class LinearRegressionwithGradientDescent:
         for i in range(0,self.n_epochs):
             for b in range(0,n_batches):
                 # fetch X and y of current mini-batch
+
                 batch = np.random.randint(self.n,size=self.batchsize)
                 current_X = self.X[batch]
-                current_z = self.z[batch]
+                current_z = self.z[batch].reshape(self.batchsize,1)
                 # calculate gradient
-                gradient = current_X.T.dot(current_X.dot(beta_0)-current_z)-self.alpha*(beta_0)*2/self.batchsize
-                beta_0 = beta_0-self.learning_schedule(i*n_batches+b)*gradient
+                gradient = (current_X.T.dot(current_X.dot(beta_0)-current_z))*2/self.batchsize-self.alpha*(beta_0)
+                lr = self.learning_schedule(i*n_batches+b)
+                beta_0 = beta_0-lr*gradient
+            #print("Current lr: ", lr)
+                #beta_0 = beta_0-self.learning_schedule(i*n_batches+b)*gradient #self.learning_rate*gradient #
         return beta_0
 
     def learning_schedule(self,t):
