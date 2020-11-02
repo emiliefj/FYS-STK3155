@@ -170,8 +170,11 @@ class LinearRegressionwithGradientDescent:
             z_prediction = self.ztilde
         if z_actual is None:
             z_actual = self.z
-
-        return np.sum((z_actual-z_prediction)**2)/len(z_actual)
+        if(z_prediction.shape!=z_actual.shape):
+            z_prediction = z_prediction.reshape((-1, 1))
+            z_actual = z_actual.reshape((-1, 1))
+        
+        return np.mean((z_actual-z_prediction)**2)
 
     def r2(self,z_prediction=None,z_actual=None):
         '''Returns the r^2 value for z.'''
@@ -180,7 +183,7 @@ class LinearRegressionwithGradientDescent:
         if z_actual is None:
             z_actual = self.z
         
-        return 1-np.sum((z_prediction-z_actual)**2)/np.sum((z_prediction-self.mean(z_prediction))**2)
+        return 1-np.sum((z_actual-z_prediction)**2)/np.sum((z_actual-self.mean(z_actual))**2)
 
     def mean(self,z):
         ''' Returns the mean of the values of the array z.'''
