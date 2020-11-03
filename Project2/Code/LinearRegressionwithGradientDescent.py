@@ -13,6 +13,7 @@ class LinearRegressionwithGradientDescent:
     Including resampling techniques:
     - K-fold Cross Validation (KFoldCV)
     - Bootstrap
+     setting alpha adds L2 regularization
     '''
 
     def __init__(self,seed=199, method="ols", alpha=0, n_epochs=10, batchsize=1, learning_rate=0.01, max_iter=1000, decay=False, t0=1.0, t1=10):
