@@ -73,10 +73,7 @@ class LinearRegressionwithGradientDescent:
                 current_z = self.z[batch].reshape(self.batchsize,1)
                 # calculate gradient
                 gradient = (current_X.T.dot(current_X.dot(beta_0)-current_z))*2/self.batchsize-self.alpha*(beta_0)
-                lr = self.learning_schedule(i*n_batches+b)
-                beta_0 = beta_0-lr*gradient
-            #print("Current lr: ", lr)
-                #beta_0 = beta_0-self.learning_schedule(i*n_batches+b)*gradient #self.learning_rate*gradient #
+                beta_0 = beta_0-self.learning_schedule(i*n_batches+b)*gradient 
         return beta_0
 
     def learning_schedule(self,t):
