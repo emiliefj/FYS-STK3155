@@ -3,20 +3,31 @@ import numpy as np
 class NeuralNet():
     """docstring for NeuralNet
 
+
+
     inspired by http://neuralnetworksanddeeplearning.com/
 
     """
-    def __init__(self, n_input, n_output, n_hidden=[4,4], h_af='sigmoid', o_af='softmax', seed=839):
+    def __init__(self, layers_list=[4,4], h_af='sigmoid', o_af='softmax', seed=839):
         np.random.seed(seed)
-        self.n_input = n_input # nodes in input layer
-        self.n_layers = len(n_hidden)
-        self.biases = [np.random.randn(y, 1) for y in n_hidden]
-        self.weights = [np.random.randn(y, x) for x, y in zip(n_output, n_hidden)]
+        self.n_layers = len(layers_list)  # number of layers
+        self.biases = [np.random.randn(y, 1) for y in layers_list[1:]]
+        self.weights = [np.random.randn(y, x) for x, y in zip(layers_list[:-1], layers_list[1:])]
+
+        self.num_layers = len(sizes)
+        self.sizes = sizes
+        self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
+        self.weights = [np.random.randn(y, x)
+                        for x, y in zip(sizes[:-1], sizes[1:])]
+
+        # Choice of activation function
+        self.h_af = h_af.lower()
+        self.o_af = o_af.lower()
 
     def feedforward(self, a):
         """Return the output of the network if "a" is input."""
         for b, w in zip(self.biases, self.weights):
-            a = sigmoid(np.dot(w, a)+b)
+            a = self.activation_function(np.dot(w, a)+b)
         return a
         
     def sgd(self, X, y, n_epochs, batchsize, learning_rate,test_data=None):
@@ -38,10 +49,7 @@ class NeuralNet():
                 current_X = X[batch]
                 current_z = y[batch].reshape(self.batchsize,1)
                 self.update_batch(current_X, current_y, learning_rate)
-            if test_data:
-                print("Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test))
-            else:
-                print("Epoch {0} complete".format(j))
+            print("Epoch {} complete".format(j))
 
     def update_batch(self, X_batch, y_batch, learning_rate):
         """
@@ -59,65 +67,112 @@ class NeuralNet():
         self.biases = [b-(learning_rate/len(X_batch))*nb 
                        for b, nb in zip(self.biases, nabla_b)]
 
-    def backprop(self, x, y):   # Rewrite this 
-                                # different activation function for output
-        """Return a tuple '(nabla_b, nabla_w)' representing the
-        gradient for the cost function C_x.  'nabla_b' and
-        'nabla_w' are layer-by-layer lists of numpy arrays, similar
-        to 'self.biases' and 'self.weights'."""
-        nabla_b = [np.zeros(b.shape) for b in self.biases]
-        nabla_w = [np.zeros(w.shape) for w in self.weights]
-        # feedforward
-        activation = x
+    def backprop(self, x, y):
+        """ Perform backpropagation to find change in weights and biases
+
+        Performs feedforward computing output at each layer. Then
+        computes the error in the outputlayer and propagates
+        back trhough the layer calculating output error. Finds
+        the change dw and db for each weight and bias. 
+
+        x, y    - input and output 
+        """
+        # feedforward #
+        activation = x    # activation of input layer
         activations = [x] # list to store all the activations, layer by layer
         zs = [] # list to store all the z vectors, layer by layer
-        for b, w in zip(self.biases, self.weights):
+        for b, w in zip(self.biases[:-1], self.weights[:-1]): # all but last layer
             z = np.dot(w, activation)+b
             zs.append(z)
-            activation = self.sigmoid(z)
+            activation = self.activation_function(z)
             activations.append(activation)
-        # backward pass
-        delta = self.cost_derivative(activations[-1], y)*self.sigmoid_prime(zs[-1])
-        nabla_b[-1] = delta
-        nabla_w[-1] = np.dot(delta, activations[-2].T)
-        # note on indexing: l = 1 means the last layer of neurons, 
-        # l = 2 is the second-last layer, and so on.
-        for l in range(2, self.num_layers):
+        # activation in output layer
+        z = np.dot(w, activation)+b
+        zs.append(z)
+        activation = self.o_activation_function(z)
+        activations.append(activation)
+        # backward pass #
+        db = [np.zeros(b.shape) for b in self.biases]
+        dw = [np.zeros(w.shape) for w in self.weights]
+        delta = self.cost_derivative(activations[-1], y)*self.o_af_derivative(zs[-1])
+        # output error in output layer
+        db[-1] = delta
+        dw[-1] = np.dot(delta, activations[-2].T)
+        # output error in remaining layers
+        for l in range(2, self.n_layers):
             z = zs[-l]
-            sp = self.sigmoid_prime(z)
-            delta = np.dot(self.weights[-l+1].T, delta) * sp
-            nabla_b[-l] = delta
-            nabla_w[-l] = np.dot(delta, activations[-l-1].T)
-        return (nabla_b, nabla_w)
+            delta = np.dot(self.weights[-l+1].T, delta)*self.h_af_derivative(z)
+            db[-l] = delta
+            dw[-l] = np.dot(delta, activations[-l-1].T)
+        return (db, dw)
+
 
     def cost_derivative(self, output_activations, y):
         """
         Return the vector of partial derivatives 
         \partial C_x/\partial a for the output activations.
+
+        Todo: open for different cost function
         """
         return (output_activations-y)
 
-    def sgd_mine(self):
-        n_batches = int(len(self.X)/self.batchsize)
-        beta_0 = np.random.randn(len(self.X[0]),1) # Make initial guess for beta
-        for i in range(self.n_epochs):
-            for b in range(n_batches):
-                # fetch X and y of current mini-batch
-                batch = np.random.randint(self.n,size=self.batchsize)
-                current_X = self.X[batch]
-                current_z = self.z[batch].reshape(self.batchsize,1)
-                # calculate gradient
-                gradient = (current_X.T.dot(current_X.dot(beta_0)-current_z))*2/self.batchsize-self.alpha*(beta_0)
-                beta_0 = beta_0-self.learning_schedule(i*n_batches+b)*gradient 
-        return beta_0
+    # Activation functions
+
+    def activation_function(self, z):
+        ''' calculating the output using the chosen activation function '''
+        if self.h_af=='relu':
+            return self.relu(z)
+        if self.h_af=='leaky':
+            return self.leaky_relu(z)
+        else: # default
+            return self.sigmoid(z)
+
+    def o_activation_function(self, z):
+        ''' 
+        Calculating the output using the chosen activation 
+        function for the output layer
+        '''
+        if self.o_af=='relu':
+            return self.relu(z)
+        if self.o_af=='leaky':
+            return self.leaky_relu(z)
+        if self.o_af=='softmax':
+            return self.softmax(z)
+        else: # default
+            return self.sigmoid(z)
+
+    def relu(self, z):
+        return [max(0,zi) for zi in z]
+
+    def leaky_relu(self, z):
+        return np.where(z>0, z, 0.01*z)
 
     def sigmoid(self, z):
         ''' logistic sigmoid function '''
         return 1./(1+exp(-z))
 
-    def d_sigmoid(self, z):
-        """Derivative of the sigmoid function."""
-        return sigmoid(z)*(1-sigmoid(z))
-
     def softmax(self, z):
         np.exp(z)/np.sum(np.exp(z)) 
+
+
+    def o_af_derivative(self,z):
+        if self.o_af=='relu':
+            return self.d_relu(z)
+        if self.o_af=='leaky':
+            return self.d_leaky_relu(z)
+        else: # default
+            return self.d_sigmoid(z)
+
+    def h_af_derivative(self,z):
+        if self.h_af=='relu':
+            return self.d_relu(z)
+        if self.h_af=='leaky':
+            return self.d_leaky_relu(z)
+        else: # default
+            return self.d_sigmoid(z)
+
+    def d_sigmoid(self, z):
+        """Derivative of the sigmoid function."""
+        return self.sigmoid(z)*(1-self.sigmoid(z))
+
+    
