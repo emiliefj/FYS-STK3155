@@ -13,13 +13,8 @@ class NeuralNet():
         np.random.seed(seed)
         self.n_layers = len(layers_list)  # number of layers
         self.biases = [np.random.randn(y, 1) for y in layers_list[1:]]
-        self.weights = [np.random.randn(y, x) for x, y in zip(layers_list[:-1], layers_list[1:])]
+        self.weights = [np.random.randn(y, x)/np.sqrt(x) for x, y in zip(layers_list[:-1], layers_list[1:])]
 
-        self.num_layers = len(sizes)
-        self.sizes = sizes
-        self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-        self.weights = [np.random.randn(y, x)/np.sqrt(x)
-                        for x, y in zip(sizes[:-1], sizes[1:])]
 
         # Choice of activation function
         self.h_af = h_af.lower()
@@ -33,7 +28,7 @@ class NeuralNet():
             a = self.activation_function(np.dot(w, a)+b)
         return a
         
-    def sgd(self, X, y, n_epochs, batchsize, learning_rate): # Add possibility for decreasing step size
+    def sgd(self, X, y, n_epochs, batchsize, learning_rate): # Add possibility for decreasing step size?
         """
         Performs stochastic gradient descent to train the model. Loops over 
         n_epochs and in each loop performs one step for each (randomly selected,
@@ -41,15 +36,14 @@ class NeuralNet():
         update weights and biases. The learning rate sets the step size.
         Prints a line at the end of each epoch to keep track of progress.
         """
-        if test_data: n_test = len(test_data)
-        n = len(training_data)
-        n_batches = int(len(self.X)/self.batchsize)
+        n = len(X)
+        n_batches = int(n/batchsize)
         for j in range(n_epochs):
             for b in range(n_batches):
                 # fetch X and y of current mini-batch
-                batch = np.random.randint(n,size=self.batchsize)
+                batch = np.random.randint(n,size=batchsize)
                 current_X = X[batch]
-                current_z = y[batch].reshape(self.batchsize,1)
+                current_y = y[batch]#.reshape(batchsize,1)
                 self.update_batch(current_X, current_y, learning_rate)
             print("Epoch {} complete".format(j))
 
@@ -61,7 +55,7 @@ class NeuralNet():
         """
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-        for i in len(X_batch):
+        for i in range(len(X_batch)):
             db_list, dw_list = self.backprop(X_batch[i], y_batch[i])
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, db_list)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, dw_list)]
@@ -81,6 +75,8 @@ class NeuralNet():
 
         x, y    - input and output 
         """
+        x = x.reshape((-1, 1))
+        y = y.reshape((-1, 1))
         # feedforward #
         activation = x    # activation of input layer
         activations = [x] # list to store all the activations, layer by layer
@@ -91,7 +87,7 @@ class NeuralNet():
             activation = self.activation_function(z)
             activations.append(activation)
         # activation in output layer
-        z = np.dot(w, activation)+b
+        z = np.dot(self.weights[-1], activation)+self.biases[-1]
         zs.append(z)
         activation = self.o_activation_function(z)
         activations.append(activation)
@@ -184,7 +180,7 @@ class NeuralNet():
 
     def sigmoid(self, z):
         ''' logistic sigmoid function '''
-        return 1./(1+exp(-z))
+        return 1./(1+np.exp(-z))
 
     def softmax(self, z):
         np.exp(z)/np.sum(np.exp(z)) 
