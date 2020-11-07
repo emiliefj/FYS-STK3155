@@ -3,22 +3,38 @@ import warnings
 
 class NeuralNet():
     """docstring for NeuralNet
-
-
-
     inspired by http://neuralnetworksanddeeplearning.com/
 
+    leyers_list - the number of nodes per layer in an ordered list
+    h_af        - the activation function used for the hidden neurons
+                  available options: 
+                  - 'sigmoid': logistic sigmoid function
+                  - 'relu': ReLU - Rectified Linear Unit
+                  - 'leaky': leaky ReLU
+    o_af        - the activation function for the output neurons
+                  available options
+                  - 'sigmoid': logistic sigmoid function
+                  - 'softmax':
+                  - 'relu'
+                  - 'leaky'
+                  - 'step': binary step function
+    cost        - the cost function used in learning: 
+                  - 'cross-entropy', or 
+                  - 'squared-loss'
+    lmda        - regularization parameter for l2 regularization
+    seed        - seed seed for random function. Used for reproduceability.
     """
-    def __init__(self, layers_list=[64,30,10], h_af='sigmoid', o_af='softmax', cost='cross-entropy', seed=839):
+    def __init__(self, layers_list=[64,30,10], h_af='sigmoid', o_af='softmax', cost='cross-entropy', lmda=0, seed=839):
         np.random.seed(seed)
         self.n_layers = len(layers_list)  # number of layers
+        self.lmda = lmda
         self.biases = [np.random.randn(y, 1) for y in layers_list[1:]] # no bias to first/input layer
         self.weights = [np.random.randn(y, x)/np.sqrt(x) for x, y in zip(layers_list[:-1], layers_list[1:])]
 
         # Choice of activation function
         self.h_af = h_af.lower()
         self.o_af = o_af.lower()
-        # Choise of cost function
+        # Choice of cost function
         self.cost = cost.lower()
 
     def feedforward(self, a):
@@ -31,7 +47,7 @@ class NeuralNet():
         z = np.dot(self.weights[-1], a)+self.biases[-1]
         return self.o_activation_function(z)
         
-    def sgd(self, X, y, n_epochs, batchsize, learning_rate,test_data=None): # Add possibility for decreasing step size?
+    def sgd(self, X, y, n_epochs, batchsize, learning_rate,test_data=None, print_epochs=True): # Add possibility for decreasing step size?
         """
         Performs stochastic gradient descent to train the model. Loops over 
         n_epochs and in each loop performs one step for each (randomly selected,
@@ -62,13 +78,13 @@ class NeuralNet():
                 self.update_batch(current_X, current_y, learning_rate)
             if test_data:
                 print("Epoch {}: Accuracy measured to {}".format(j+1, self.evaluate_accuracy(X_test, y_test)))
-            else:
+            elif print_epochs:
                 # Testing on a small selection of the training data to not slow down too much
                 #print("Epoch {}: {} / {} (on training data)".format(j+1, self.evaluate_accuracy(zip(X[accuracy_batch],y[accuracy_batch])), batchsize))
                 print("Epoch {} complete".format(j+1))
                 
 
-    def update_batch(self, X_batch, y_batch, learning_rate):
+    def update_batch(self, X_batch, y_batch, lr):
         """
         Update the network's weights and biases by applying gradient
         descent using backpropagation on the single mini batch given
@@ -76,13 +92,14 @@ class NeuralNet():
         """
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-        for i in range(len(X_batch)):
+        n = len(X_batch)
+        for i in range(n):
             db_list, dw_list = self.backprop(X_batch[i], y_batch[i])
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, db_list)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, dw_list)]
-        self.weights = [w-(learning_rate/len(X_batch))*nw 
+        self.weights = [(1-lr*(self.lmda/n))*w-(lr/n)*nw 
                         for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b-(learning_rate/len(X_batch))*nb 
+        self.biases = [b-(lr/n)*nb 
                        for b, nb in zip(self.biases, nabla_b)]
 
     def backprop(self, x, y):
@@ -131,21 +148,11 @@ class NeuralNet():
             dw[-l] = np.dot(delta, activations[-l-1].T)
         return (db, dw)
 
-    def predict(self,X): #pointless?
-        pred = [np.argmax(self.feedforward(x)) for x in X]
-        return pred 
+    def predict(self,X):
+        return [np.argmax(self.feedforward(x)) for x in X]
 
     def evaluate_accuracy(self, X, y):
-        #print("X: ",np.shape(X))
-        pred = [np.argmax(self.feedforward(x)) for x in X]
-        #print("X: ",np.shape(X))
-        # for i in range(len(X)):
-        #     a = self.feedforward(X[i])
-        #     #print("a: ",np.shape(a))
-        #     pred = np.argmax(a)
-        #     #print(pred,"  y:",y[i])
-
-
+        pred = self.predict(X) #[np.argmax(self.feedforward(x)) for x in X]
         return accuracy(pred,y)
 
 
