@@ -11,8 +11,11 @@ class NeuralNet():
                   - 'sigmoid': logistic sigmoid function
                   - 'relu': ReLU - Rectified Linear Unit
                   - 'leaky': leaky ReLU
+                  - 'elu'
     o_af        - the activation function for the output neurons
                   available options
+                  - 'none': No activation function in output layer.
+                            Typically used for regression
                   - 'sigmoid': logistic sigmoid function
                   - 'softmax':
                   - 'relu'
@@ -24,12 +27,13 @@ class NeuralNet():
     lmda        - regularization parameter for l2 regularization
     seed        - seed seed for random function. Used for reproduceability.
     """
-    def __init__(self, layers_list=[64,30,10], h_af='sigmoid', o_af='softmax', cost='cross-entropy', lmda=0, seed=839):
+    def __init__(self, layers_list=[64,30,10], h_af='sigmoid', o_af='softmax', cost='cross-entropy', lmda=0, metric='accuracy',seed=839):
         np.random.seed(seed)
         self.n_layers = len(layers_list)  # number of layers
         self.lmda = lmda
         self.biases = [np.random.randn(y, 1) for y in layers_list[1:]] # no bias to first/input layer
         self.weights = [np.random.randn(y, x)/np.sqrt(x) for x, y in zip(layers_list[:-1], layers_list[1:])]
+        self.metric = metric.lower()
 
         # Choice of activation function
         self.h_af = h_af.lower()
@@ -39,7 +43,8 @@ class NeuralNet():
 
     def feedforward(self, a):
         """Return the output of the network if "a" is input."""
-        a = a.reshape((-1, 1))
+        if(a.ndim<2):
+            a = a.reshape((-1, 1))
         # loop through hidden layers
         for b, w in zip(self.biases[:-1], self.weights[:-1]):
             a = self.activation_function(np.dot(w, a)+b)
@@ -47,7 +52,7 @@ class NeuralNet():
         z = np.dot(self.weights[-1], a)+self.biases[-1]
         return self.o_activation_function(z)
         
-    def sgd(self, X, y, n_epochs, batchsize, learning_rate,test_data=None, print_epochs=True): # Add possibility for decreasing step size?
+    def sgd(self, X, y, n_epochs, batchsize, learning_rate, test_data=None, print_epochs=True): # Add possibility for decreasing step size?
         """
         Performs stochastic gradient descent to train the model. Loops over 
         n_epochs and in each loop performs one step for each (randomly selected,
@@ -62,8 +67,8 @@ class NeuralNet():
         if(test_data):
             X_test, y_test = zip(*test_data)
             n_test = len(X_test)
-        if(y.ndim==1):
-            y = np.array([self._vector_transform(yi) for yi in y])
+        #if(y.ndim==1): # only for classification of 10 things. Make optional, and more general (i.e. varying number of outputs)
+        #    y = np.array([self._vector_transform(yi) for yi in y])
         n = len(X)
         n_batches = int(n/batchsize)
         accuracy_batch = np.random.randint(n,size=batchsize)
@@ -77,7 +82,7 @@ class NeuralNet():
                 # print(np.shape(current_y))
                 self.update_batch(current_X, current_y, learning_rate)
             if test_data:
-                print("Epoch {}: Accuracy measured to {}".format(j+1, self.evaluate_accuracy(X_test, y_test)))
+                print("Epoch {}: Measured {}: {}".format(j+1, self.metric, self.evaluate_accuracy(X_test, y_test)))
             elif print_epochs:
                 # Testing on a small selection of the training data to not slow down too much
                 #print("Epoch {}: {} / {} (on training data)".format(j+1, self.evaluate_accuracy(zip(X[accuracy_batch],y[accuracy_batch])), batchsize))
@@ -148,12 +153,22 @@ class NeuralNet():
             dw[-l] = np.dot(delta, activations[-l-1].T)
         return (db, dw)
 
-    def predict(self,X):
-        return [np.argmax(self.feedforward(x)) for x in X]
+    def predict(self,X): # different for classification vs regression
+        return [self.feedforward(x) for x in X]
+        #return [np.argmax(self.feedforward(x)) for x in X]
 
     def evaluate_accuracy(self, X, y):
-        pred = self.predict(X) #[np.argmax(self.feedforward(x)) for x in X]
-        return accuracy(pred,y)
+        pred = [self.feedforward(x) for x in X]
+        if self.metric=='accuracy':
+            pred = self.predict(X)
+            return accuracy(pred,y)
+        if self.metric=='mse':
+            return mse(pred,y)
+        if self.metric=='r2':
+            return r2(pred,y)
+        else:
+            warnings.warn('Could not recognize chosen metric. No metric used.')
+            return 0
 
 
     def calculate_delta(self, z, a, y):
@@ -163,7 +178,7 @@ class NeuralNet():
         if self.cost=="squared_error":
             return (a-y)*self.o_af_derivative(z)
         else: 
-            warnings.warn('Did not recognize chosen cost function. \
+            warnings.warn('Could not recognize chosen cost function. \
                 Using default \'cross-entropy\'.')
             return (a-y)
 
@@ -189,6 +204,8 @@ class NeuralNet():
         '''
         if self.h_af=='sigmoid':
             return self.sigmoid(z)
+        if self.h_af=='elu':
+            return self.elu(z)
         if self.h_af=='relu':
             return self.relu(z)
         if self.h_af=='leaky':
@@ -205,6 +222,8 @@ class NeuralNet():
 
         z   - input to the activation function, wa+b
         '''
+        if self.o_af=='none':
+            return z
         if self.o_af=='sigmoid':
             return self.sigmoid(z)
         if self.o_af=='softmax':
@@ -230,8 +249,13 @@ class NeuralNet():
     def leaky_relu(self, z):
         return np.where(z>0, z, 0.01*z)
 
+    def elu(self, z):
+        ''' ELU with alpha=1 '''
+        return  np.where(z<0, np.exp(z)-1, z)
+
     def sigmoid(self, z):
         ''' logistic sigmoid function '''
+        #return np.where(z<0, np.exp(z)/(1+np.exp(z)), np.exp(-z)/(1+np.exp(-z)))
         return 1./(1+np.exp(-z))
 
     def step(self,z):
@@ -246,14 +270,18 @@ class NeuralNet():
         The derivatrive of the chosen activation function for the output 
         layer
 
-        z   - input to the derivative of the af, wa+b
+        z   - input to the derivative of the activation function, wa+b
         '''
+        if self.o_af=='none':
+            return 1.0
         if self.o_af=='sigmoid':
             return self.d_sigmoid(z)
         if self.o_af=='relu':
             return self.d_relu(z)
         if self.o_af=='leaky':
             return self.d_leaky_relu(z)
+        if self.o_af=='elu':
+            return self.d_elu(z)
         if self.o_af=='step':
             return self.d_step(z)
         else: # default
@@ -285,6 +313,9 @@ class NeuralNet():
     def d_leaky_relu(self, z):
         return np.where(z<0, 1, 0.01)
 
+    def d_elu(self, z):
+        return np.where(z<0, np.exp(z), z)
+
     def d_sigmoid(self, z):
         return self.sigmoid(z)*(1-self.sigmoid(z))
 
@@ -304,6 +335,44 @@ class NeuralNet():
         vector = np.zeros((10,))
         vector[i] = 1.0
         return vector
+
+
+
+
+def mse(pred, actual):
+    '''
+    The mean squared error. Used to measure performance on 
+    regression problems
+
+    mse = sum((actual-pred)^2)/n
+
+    pred    - the prediction made by the model
+    actual  - the actual value in the data aka target
+    '''
+    pred = np.array(pred)
+    actual = np.array(actual)
+    if(pred.shape!=actual.shape):
+        pred = pred.reshape((-1, 1))
+        actual = actual.reshape((-1, 1))
+
+    return np.mean((actual-pred)**2)
+
+def r2(pred, actual):
+    '''
+    The r2 score. Used to measure performance on 
+    regression problems
+
+    r2 = RSS/TSS
+
+    pred    - the prediction made by the model
+    actual  - the actual value in the data aka target
+    '''
+    pred = np.array(pred) # skip this
+    actual = np.array(actual)
+    if(pred.shape!=actual.shape):
+        pred = pred.reshape((-1, 1))
+        actual = actual.reshape((-1, 1))
+    return 1-np.sum((actual-pred)**2)/np.sum((actual-np.mean(actual))**2)
 
 def accuracy(pred, actual):
     ''' 
