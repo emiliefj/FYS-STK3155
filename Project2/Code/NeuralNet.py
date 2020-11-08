@@ -244,7 +244,8 @@ class NeuralNet():
         return np.tanh(z)
 
     def relu(self, z):
-        return [max(0,zi) for zi in z]
+        #return np.array([max(0,zi) for zi in z])
+        return np.where(z>0, z, 0)
 
     def leaky_relu(self, z):
         return np.where(z>0, z, 0.01*z)
