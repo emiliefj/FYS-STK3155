@@ -1,0 +1,1635 @@
+\documentclass[11pt]{article}
+
+    \usepackage[breakable]{tcolorbox}
+    \usepackage{parskip} % Stop auto-indenting (to mimic markdown behaviour)
+    
+    \usepackage{iftex}
+    \ifPDFTeX
+    	\usepackage[T1]{fontenc}
+    	\usepackage{mathpazo}
+    \else
+    	\usepackage{fontspec}
+    \fi
+
+    % Basic figure setup, for now with no caption control since it's done
+    % automatically by Pandoc (which extracts ![](path) syntax from Markdown).
+    \usepackage{graphicx}
+    % Maintain compatibility with old templates. Remove in nbconvert 6.0
+    \let\Oldincludegraphics\includegraphics
+    % Ensure that by default, figures have no caption (until we provide a
+    % proper Figure object with a Caption API and a way to capture that
+    % in the conversion process - todo).
+    \usepackage{caption}
+    \DeclareCaptionFormat{nocaption}{}
+    \captionsetup{format=nocaption,aboveskip=0pt,belowskip=0pt}
+
+    \usepackage{float}
+    \floatplacement{figure}{H} % forces figures to be placed at the correct location
+    \usepackage{xcolor} % Allow colors to be defined
+    \usepackage{enumerate} % Needed for markdown enumerations to work
+    \usepackage{geometry} % Used to adjust the document margins
+    \usepackage{amsmath} % Equations
+    \usepackage{amssymb} % Equations
+    \usepackage{textcomp} % defines textquotesingle
+    % Hack from http://tex.stackexchange.com/a/47451/13684:
+    \AtBeginDocument{%
+        \def\PYZsq{\textquotesingle}% Upright quotes in Pygmentized code
+    }
+    \usepackage{upquote} % Upright quotes for verbatim code
+    \usepackage{eurosym} % defines \euro
+    \usepackage[mathletters]{ucs} % Extended unicode (utf-8) support
+    \usepackage{fancyvrb} % verbatim replacement that allows latex
+    \usepackage{grffile} % extends the file name processing of package graphics 
+                         % to support a larger range
+    \makeatletter % fix for old versions of grffile with XeLaTeX
+    \@ifpackagelater{grffile}{2019/11/01}
+    {
+      % Do nothing on new versions
+    }
+    {
+      \def\Gread@@xetex#1{%
+        \IfFileExists{"\Gin@base".bb}%
+        {\Gread@eps{\Gin@base.bb}}%
+        {\Gread@@xetex@aux#1}%
+      }
+    }
+    \makeatother
+    \usepackage[Export]{adjustbox} % Used to constrain images to a maximum size
+    \adjustboxset{max size={0.9\linewidth}{0.9\paperheight}}
+
+    % The hyperref package gives us a pdf with properly built
+    % internal navigation ('pdf bookmarks' for the table of contents,
+    % internal cross-reference links, web links for URLs, etc.)
+    \usepackage{hyperref}
+    % The default LaTeX title has an obnoxious amount of whitespace. By default,
+    % titling removes some of it. It also provides customization options.
+    \usepackage{titling}
+    \usepackage{longtable} % longtable support required by pandoc >1.10
+    \usepackage{booktabs}  % table support for pandoc > 1.12.2
+    \usepackage[inline]{enumitem} % IRkernel/repr support (it uses the enumerate* environment)
+    \usepackage[normalem]{ulem} % ulem is needed to support strikethroughs (\sout)
+                                % normalem makes italics be italics, not underlines
+    \usepackage{mathrsfs}
+    
+
+    
+    % Colors for the hyperref package
+    \definecolor{urlcolor}{rgb}{0,.145,.698}
+    \definecolor{linkcolor}{rgb}{.71,0.21,0.01}
+    \definecolor{citecolor}{rgb}{.12,.54,.11}
+
+    % ANSI colors
+    \definecolor{ansi-black}{HTML}{3E424D}
+    \definecolor{ansi-black-intense}{HTML}{282C36}
+    \definecolor{ansi-red}{HTML}{E75C58}
+    \definecolor{ansi-red-intense}{HTML}{B22B31}
+    \definecolor{ansi-green}{HTML}{00A250}
+    \definecolor{ansi-green-intense}{HTML}{007427}
+    \definecolor{ansi-yellow}{HTML}{DDB62B}
+    \definecolor{ansi-yellow-intense}{HTML}{B27D12}
+    \definecolor{ansi-blue}{HTML}{208FFB}
+    \definecolor{ansi-blue-intense}{HTML}{0065CA}
+    \definecolor{ansi-magenta}{HTML}{D160C4}
+    \definecolor{ansi-magenta-intense}{HTML}{A03196}
+    \definecolor{ansi-cyan}{HTML}{60C6C8}
+    \definecolor{ansi-cyan-intense}{HTML}{258F8F}
+    \definecolor{ansi-white}{HTML}{C5C1B4}
+    \definecolor{ansi-white-intense}{HTML}{A1A6B2}
+    \definecolor{ansi-default-inverse-fg}{HTML}{FFFFFF}
+    \definecolor{ansi-default-inverse-bg}{HTML}{000000}
+
+    % common color for the border for error outputs.
+    \definecolor{outerrorbackground}{HTML}{FFDFDF}
+
+    % commands and environments needed by pandoc snippets
+    % extracted from the output of `pandoc -s`
+    \providecommand{\tightlist}{%
+      \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+    \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+    % Add ',fontsize=\small' for more characters per line
+    \newenvironment{Shaded}{}{}
+    \newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+    \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+    \newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+    \newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+    \newcommand{\RegionMarkerTok}[1]{{#1}}
+    \newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\NormalTok}[1]{{#1}}
+    
+    % Additional commands for more recent versions of Pandoc
+    \newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{{#1}}}
+    \newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{{#1}}}
+    \newcommand{\ImportTok}[1]{{#1}}
+    \newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{{#1}}}}
+    \newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{{#1}}}
+    \newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{{#1}}}
+    \newcommand{\BuiltInTok}[1]{{#1}}
+    \newcommand{\ExtensionTok}[1]{{#1}}
+    \newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{{#1}}}
+    \newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{{#1}}}
+    \newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    
+    
+    % Define a nice break command that doesn't care if a line doesn't already
+    % exist.
+    \def\br{\hspace*{\fill} \\* }
+    % Math Jax compatibility definitions
+    \def\gt{>}
+    \def\lt{<}
+    \let\Oldtex\TeX
+    \let\Oldlatex\LaTeX
+    \renewcommand{\TeX}{\textrm{\Oldtex}}
+    \renewcommand{\LaTeX}{\textrm{\Oldlatex}}
+    % Document parameters
+    % Document title
+    \title{Project 2 - FYS-STK3155}
+    
+    
+    
+    
+    
+% Pygments definitions
+\makeatletter
+\def\PY@reset{\let\PY@it=\relax \let\PY@bf=\relax%
+    \let\PY@ul=\relax \let\PY@tc=\relax%
+    \let\PY@bc=\relax \let\PY@ff=\relax}
+\def\PY@tok#1{\csname PY@tok@#1\endcsname}
+\def\PY@toks#1+{\ifx\relax#1\empty\else%
+    \PY@tok{#1}\expandafter\PY@toks\fi}
+\def\PY@do#1{\PY@bc{\PY@tc{\PY@ul{%
+    \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
+\def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
+
+\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
+\expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
+\expandafter\def\csname PY@tok@nv\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
+\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
+\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
+\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
+\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
+\expandafter\def\csname PY@tok@gt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
+\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
+\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@fm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sa\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@dl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s2\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ch\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cpf\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+
+\def\PYZbs{\char`\\}
+\def\PYZus{\char`\_}
+\def\PYZob{\char`\{}
+\def\PYZcb{\char`\}}
+\def\PYZca{\char`\^}
+\def\PYZam{\char`\&}
+\def\PYZlt{\char`\<}
+\def\PYZgt{\char`\>}
+\def\PYZsh{\char`\#}
+\def\PYZpc{\char`\%}
+\def\PYZdl{\char`\$}
+\def\PYZhy{\char`\-}
+\def\PYZsq{\char`\'}
+\def\PYZdq{\char`\"}
+\def\PYZti{\char`\~}
+% for compatibility with earlier versions
+\def\PYZat{@}
+\def\PYZlb{[}
+\def\PYZrb{]}
+\makeatother
+
+
+    % For linebreaks inside Verbatim environment from package fancyvrb. 
+    \makeatletter
+        \newbox\Wrappedcontinuationbox 
+        \newbox\Wrappedvisiblespacebox 
+        \newcommand*\Wrappedvisiblespace {\textcolor{red}{\textvisiblespace}} 
+        \newcommand*\Wrappedcontinuationsymbol {\textcolor{red}{\llap{\tiny$\m@th\hookrightarrow$}}} 
+        \newcommand*\Wrappedcontinuationindent {3ex } 
+        \newcommand*\Wrappedafterbreak {\kern\Wrappedcontinuationindent\copy\Wrappedcontinuationbox} 
+        % Take advantage of the already applied Pygments mark-up to insert 
+        % potential linebreaks for TeX processing. 
+        %        {, <, #, %, $, ' and ": go to next line. 
+        %        _, }, ^, &, >, - and ~: stay at end of broken line. 
+        % Use of \textquotesingle for straight quote. 
+        \newcommand*\Wrappedbreaksatspecials {% 
+            \def\PYGZus{\discretionary{\char`\_}{\Wrappedafterbreak}{\char`\_}}% 
+            \def\PYGZob{\discretionary{}{\Wrappedafterbreak\char`\{}{\char`\{}}% 
+            \def\PYGZcb{\discretionary{\char`\}}{\Wrappedafterbreak}{\char`\}}}% 
+            \def\PYGZca{\discretionary{\char`\^}{\Wrappedafterbreak}{\char`\^}}% 
+            \def\PYGZam{\discretionary{\char`\&}{\Wrappedafterbreak}{\char`\&}}% 
+            \def\PYGZlt{\discretionary{}{\Wrappedafterbreak\char`\<}{\char`\<}}% 
+            \def\PYGZgt{\discretionary{\char`\>}{\Wrappedafterbreak}{\char`\>}}% 
+            \def\PYGZsh{\discretionary{}{\Wrappedafterbreak\char`\#}{\char`\#}}% 
+            \def\PYGZpc{\discretionary{}{\Wrappedafterbreak\char`\%}{\char`\%}}% 
+            \def\PYGZdl{\discretionary{}{\Wrappedafterbreak\char`\$}{\char`\$}}% 
+            \def\PYGZhy{\discretionary{\char`\-}{\Wrappedafterbreak}{\char`\-}}% 
+            \def\PYGZsq{\discretionary{}{\Wrappedafterbreak\textquotesingle}{\textquotesingle}}% 
+            \def\PYGZdq{\discretionary{}{\Wrappedafterbreak\char`\"}{\char`\"}}% 
+            \def\PYGZti{\discretionary{\char`\~}{\Wrappedafterbreak}{\char`\~}}% 
+        } 
+        % Some characters . , ; ? ! / are not pygmentized. 
+        % This macro makes them "active" and they will insert potential linebreaks 
+        \newcommand*\Wrappedbreaksatpunct {% 
+            \lccode`\~`\.\lowercase{\def~}{\discretionary{\hbox{\char`\.}}{\Wrappedafterbreak}{\hbox{\char`\.}}}% 
+            \lccode`\~`\,\lowercase{\def~}{\discretionary{\hbox{\char`\,}}{\Wrappedafterbreak}{\hbox{\char`\,}}}% 
+            \lccode`\~`\;\lowercase{\def~}{\discretionary{\hbox{\char`\;}}{\Wrappedafterbreak}{\hbox{\char`\;}}}% 
+            \lccode`\~`\:\lowercase{\def~}{\discretionary{\hbox{\char`\:}}{\Wrappedafterbreak}{\hbox{\char`\:}}}% 
+            \lccode`\~`\?\lowercase{\def~}{\discretionary{\hbox{\char`\?}}{\Wrappedafterbreak}{\hbox{\char`\?}}}% 
+            \lccode`\~`\!\lowercase{\def~}{\discretionary{\hbox{\char`\!}}{\Wrappedafterbreak}{\hbox{\char`\!}}}% 
+            \lccode`\~`\/\lowercase{\def~}{\discretionary{\hbox{\char`\/}}{\Wrappedafterbreak}{\hbox{\char`\/}}}% 
+            \catcode`\.\active
+            \catcode`\,\active 
+            \catcode`\;\active
+            \catcode`\:\active
+            \catcode`\?\active
+            \catcode`\!\active
+            \catcode`\/\active 
+            \lccode`\~`\~ 	
+        }
+    \makeatother
+
+    \let\OriginalVerbatim=\Verbatim
+    \makeatletter
+    \renewcommand{\Verbatim}[1][1]{%
+        %\parskip\z@skip
+        \sbox\Wrappedcontinuationbox {\Wrappedcontinuationsymbol}%
+        \sbox\Wrappedvisiblespacebox {\FV@SetupFont\Wrappedvisiblespace}%
+        \def\FancyVerbFormatLine ##1{\hsize\linewidth
+            \vtop{\raggedright\hyphenpenalty\z@\exhyphenpenalty\z@
+                \doublehyphendemerits\z@\finalhyphendemerits\z@
+                \strut ##1\strut}%
+        }%
+        % If the linebreak is at a space, the latter will be displayed as visible
+        % space at end of first line, and a continuation symbol starts next line.
+        % Stretch/shrink are however usually zero for typewriter font.
+        \def\FV@Space {%
+            \nobreak\hskip\z@ plus\fontdimen3\font minus\fontdimen4\font
+            \discretionary{\copy\Wrappedvisiblespacebox}{\Wrappedafterbreak}
+            {\kern\fontdimen2\font}%
+        }%
+        
+        % Allow breaks at special characters using \PYG... macros.
+        \Wrappedbreaksatspecials
+        % Breaks at punctuation characters . , ; ? ! and / need catcode=\active 	
+        \OriginalVerbatim[#1,codes*=\Wrappedbreaksatpunct]%
+    }
+    \makeatother
+
+    % Exact colors from NB
+    \definecolor{incolor}{HTML}{303F9F}
+    \definecolor{outcolor}{HTML}{D84315}
+    \definecolor{cellborder}{HTML}{CFCFCF}
+    \definecolor{cellbackground}{HTML}{F7F7F7}
+    
+    % prompt
+    \makeatletter
+    \newcommand{\boxspacing}{\kern\kvtcb@left@rule\kern\kvtcb@boxsep}
+    \makeatother
+    \newcommand{\prompt}[4]{
+        {\ttfamily\llap{{\color{#2}[#3]:\hspace{3pt}#4}}\vspace{-\baselineskip}}
+    }
+    
+
+    
+    % Prevent overflowing lines due to hard-to-break entities
+    \sloppy 
+    % Setup hyperref package
+    \hypersetup{
+      breaklinks=true,  % so long urls are correctly broken across lines
+      colorlinks=true,
+      urlcolor=urlcolor,
+      linkcolor=linkcolor,
+      citecolor=citecolor,
+      }
+    % Slightly bigger margins than the latex defaults
+    
+    \geometry{verbose,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
+    
+    
+
+\begin{document}
+    
+    \maketitle
+    
+    
+
+    
+    \hypertarget{abstract}{%
+\section{Abstract}\label{abstract}}
+
+    We have explored
+
+    \hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+    
+
+    \hypertarget{data}{%
+\section{Data}\label{data}}
+
+\hypertarget{franke-function-and-terrain-data}{%
+\subsection{Franke Function and Terrain
+Data}\label{franke-function-and-terrain-data}}
+
+We will revisit these datasets from project one. For further description
+refer to the report for project 1 {[}1{]}
+
+    \hypertarget{mnist-handwritten-numbers}{%
+\subsection{MNIST Handwritten Numbers}\label{mnist-handwritten-numbers}}
+
+For our classification problem we will be using the MNIST database of
+handwritten numbers, or more specifically a subset of this available as
+the digits dataset in scikit-learn{[}2{]}.
+
+This dataset contains pixel images of handwritten numbers. In total the
+digits dataset contains 1797 8x8 images. Meaning we have a dataset
+consisting of 1797 data points, each with 64 descriptors or inputs, and
+one output, the label.
+
+For a plot of one such data point, see figure 1.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_6_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 1: Plot of one of the entries in the digits dataset showing a number 0.
+    \end{Verbatim}
+
+    We will use this dataset to fit and test our classification models. To
+prepare the data we split it into a training set and a test set. I use
+\(\texttt{scikit\-learn}\)'s \(\texttt{train\_test\_split}()\) for this and
+an 80-20 split.
+
+
+    We want to make sure that the different classes, i.e.~the labels are
+similarly distributed among the test set and the training test. If for
+instance no occurrences of the label `3' is found in the training set,
+models trained on this set are expected to perform poorly on identifying
+such digits in the test set. To avoid such issues we set the
+\(\texttt{stratify}\) parameter in \(\texttt{train\_test\_split()}\) to
+the target variable. The result is seen in figure 5, and we can see that
+the results are satisfactory; the labels appear to be very evenly
+distributed.
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_10_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 2: Histogram of label distribution in training and test set.
+    \end{Verbatim}
+
+    Figure 2 shows the distribution of the different labels int the test and
+training sets. We see that the labels seem to be very evenly
+distributed.
+
+    \hypertarget{methods}{%
+\section{Methods}\label{methods}}
+
+For descriptions of ordinary least squares and ridge regression, please
+refer to my report for project 1{[}1{]}. \#\# Performance Measures For a
+description of the mean square error and \(r^2\) please again consult
+the report of project 1{[}1{]}.
+
+\hypertarget{accuracy}{%
+\subsubsection{Accuracy}\label{accuracy}}
+
+We use the accuracy score to measure the performance of our
+classification methods. This measure is given by the number of correctly
+guessed targets \(t_i\) divided by the total number of targets, that is
+
+\[
+\text{Accuracy} = \frac{\sum_{i=1}^n I(t_i = y_i)}{n} ,
+\]
+
+where \(I\) is the indicator function, which takes the value \(1\) if
+\(t_i = y_i\) and \(0\) otherwise (for a binary classification problem).
+Here \(t_i\) represents the target and \(y_i\) is the prediction. The
+number of targets is given by \(n\).
+
+    \hypertarget{regression-methods}{%
+\subsection{Regression Methods}\label{regression-methods}}
+
+For description of regular linear regression see Methods section in
+project 1 {[}1{]}.
+
+\hypertarget{logistic-regression}{%
+\subsubsection{Logistic Regression}\label{logistic-regression}}
+
+Logistic regression is a machine learning algorithm typically used for
+classification problems. It is most typically applied in binary
+classification problems, e.g.~true/false, yes/no, positive/negative, but
+it can be extended to problems with multiple classes, called multinomial
+logistic regression.
+
+I logistic regression a logistic function is applied to model the
+dependent variable. Such a logistic function takes in any input value,
+and will always return a value between zero and one. This is often
+viewed as transforming the input and outputting a probability value. In
+classification we are interested in discrete output. Some functions,
+like the step function (see figure number) produces a binary zero or
+one, while we for other functions, like the sigmoid translate the output
+values according to a cutoff, e.g.~output above or equal 0.5 gets coded
+as a one.
+
+The classic function used to transform the input in logistic regression
+is the sigmoid, see the section on activation functions and figure 4.
+
+The general form of logistic regression is
+
+\[
+\hat{y_k} = g(\beta X_k),
+\]
+
+where \(g(z)\) is the sigmoid and \(\beta\) are weights fit to the
+inputs in training the model.
+
+While we in linear regression used the mean square error as the cost
+function, this cost function will we non-convex for the logistic case.
+This makes finding the minimum difficult, and for this reason we cannot
+use it as our cost function for logistic regression. To find a cost
+function we can use the maximum likelihood estimator. In the binary case
+this has the form,
+
+
+\begin{align*}
+P((x_i,y_i)|\hat{\beta})& = \prod_{i=1}^n \left[p(y_i=1|x_i,\hat{\beta})\right]^{y_i}\left[1-p(y_i=1|x_i,\hat{\beta}))\right]^{1-y_i}\nonumber \\
+\end{align*}
+
+
+which by taking the logarithm and reordering leads to the cross-entropy
+
+\[
+\mathcal{C}(\hat{\beta})=-\sum_{i=1}^n  \left(y_i(\boldsymbol{\beta}x_i) -\log{(1+\exp{(\boldsymbol{\beta}x_i)})}\right).
+\] The cross-entropy will be a convex function of the weights
+\(\hat{\beta}\). To train our model we want to minimixe the derivative
+of the cost function with respect to the weights \(\beta\).
+
+    \hypertarget{multinomial-logistic-regression9}{%
+\paragraph{Multinomial Logistic
+Regression{[}9{]}}\label{multinomial-logistic-regression9}}
+
+In multinomial logistic regression, also known as softmax regression we
+use the same general procedure as in binomial logistic regression, but
+now the output of the model must be coded into discrete values using
+several ranges. If for example we are interested in classifying our
+input to one of four classes A, B, C and D we can code an output between
+0 and 0.25 to A, an output between 0.25 and 0.5 to B and so forth.
+
+The \emph{Softmax} function is the preferred output or activation
+function for multinomial logistic regression. For a classification
+problem with \(K\) classes, the softmax gives the probability for each
+class.
+
+Using maximum likelihood and a set of \(K\) classes \(k_i\) we get
+
+\[
+\prod_{i=1}^N\prod_{k=1}^K P(y_i=k|x_i,\beta)
+\]
+
+with the probabilities given by the softmax function
+
+\[
+P(y_i=k|x_i,\beta) = \frac{\exp(\beta^{(k)}x_i)}{\sum_{j=1}^K \exp(\beta^{(j)}x_i)}
+\]
+
+for each training data point \(i\). Here \(\beta^{(k)}\) are the weights
+of the model. We see from the form of the softmax that it is the
+probability of class \(k_i\) divided by the probability of all the other
+classes.
+
+We want to maximize this, or equivalently, minimize its logarithm
+
+\[
+C(\beta) = -\sum_{i=1}^N\sum_{k=1}^K 1\{y_i=k\}\log\frac{\exp(\beta^{(k)T}x_i)}{\sum_{j=1}^K \exp(\beta^{(j)T}x_i)}
+\]
+
+which is our cost function. Here \(\{\texttt{statement}\}\) is \(1\) if
+\(\texttt{statement}\) is \(\texttt{True}\) and \(0\) otherwise.
+
+To train our model we want to minimize the cost function. To do this we
+need the gradient, which is given by
+
+\[
+\nabla_{\beta^k} C(\beta) = -\sum_{i=1}^Nx_i\bigg(1\{y_i=k\}-P(y_i=k|x_i,\beta)\bigg).
+\]
+
+A method like stochastic gradient descent or newton's method can be used
+together with this to train the model and find optimal weights
+\(\beta\).
+
+    \hypertarget{stochastic-gradient-descent}{%
+\subsection{Stochastic Gradient
+Descent}\label{stochastic-gradient-descent}}
+
+Stochastic Gradient Descent (SGD) is a variation of the gradient descent
+method. There are many different variations of gradient descent but the
+common denominator is that they work to find the minima of a function
+(typically the cost function) by iteratively moving in the direction of
+steepest descent.
+
+In other words, if we want to find the minimum of a function
+\(F(\mathbf{x})\), we should move in the direction of the negative
+gradient \(-\nabla F(\mathbf{x})\).
+
+For a (typically small) stepsize \(\gamma_k > 0\) known as the step
+size, or learning rate we then have
+
+\[
+\mathbf{x}_{k+1} = \mathbf{x}_k - \gamma_k \nabla F(\mathbf{x}_k),
+\]
+
+An initial guess is made at the first step.
+
+For a convex cost function and a sufficiently small stepsize
+\(\gamma_k\) this method can be used to find the global minimum of said
+cost function.
+
+One drawback of this method is that computing the gradient for large
+datasets can be very computationally expensive. This is where SGD and
+its variations comes in. Instead of calculating the gradiant for all
+datapoints, SGD chooses a subset of the data to calculate the gradient
+on. The method divides the dataset into a set of \(N/M\) so-called
+mini-batches, and for each step the gradient is calculated on one of
+these mini-batches. These mini-batches are denoted by \(B_k\) where
+\(k=1,\cdots,N/M\). \(N\) is here the size of the training data, and
+\(M\) is the size of each mini-batch.
+
+Rewriting the gradient descent method in terms of a cost function
+\(C(\mathbf{\beta})\), we get
+
+\[
+\mathbf{\beta}_{k+1} = \mathbf{\beta}_k - \gamma_k \nabla_{\beta} C(\mathbf{x}_k,\mathbf{\beta}_k),
+\]
+
+Taking the gradient with respect to one mini-batch per step we get
+
+\[
+\beta_{k+1} = \beta_k - \gamma_k \sum_{i \in B_k}^n \nabla_\beta c_i(\mathbf{x}_i,
+\mathbf{\beta}_k)
+\]
+
+which is the stochastic gradient descent method.
+
+In linear regression the cost function is the mean square error. For the
+gradient of the cost function we then have
+
+\[
+\nabla_{\beta} C(\mathbf{\beta}) = \frac{2}{n} \bigg( X^T (X\beta-y) + \lambda \beta \bigg)
+\]
+
+here I have added an \(L_2\) regularization parameter \(\lambda\) which
+will be zero for ordinary least squares, but take some non-zero value
+for ridge. The number of datapoints is given by n.~
+
+For logistic regression the cost function is the cross-entropy, which we
+went over in the section on logistic regression.
+
+\hypertarget{decaying-learning-rate}{%
+\subsubsection{Decaying Learning Rate}\label{decaying-learning-rate}}
+
+Gradient methods can be sensitive to the choice of the step size or
+learning rate \(\gamma\), and both too small and too large values can
+give very poor results. One technique to limit this issue is to
+gradually decrease the learning rate as we move through the epochs. The
+idea is that we use large steps in the beginning when we are likely to
+be far away from the solution, and smaller steps as we approach the
+minimum.
+
+The let the learning rate \(\gamma_j\) \emph{decay} according to the
+function
+
+\[
+\gamma_j(t; t_0, t_1) = \frac{t_0}{t+t_1} 
+\]
+
+where \(t_0, t_1 > 0\) are fixed parameters, and \(t=i \cdot m + b\)
+with \(i\) denoting the current epoch number, \(m\) the number of
+mini-batches, and \(b\) the current batch number.
+
+    \hypertarget{neural-network}{%
+\subsection{Neural Network}\label{neural-network}}
+
+Neural networks are a group of models originally inspired by biological
+neuron used in supervised and unsupervised learning as well as
+specialized tasks such as image processing. They are non-linear models
+and can be considered powerful extensions of supervised learning methods
+like linear and logistic regression We will be focusing on a type of
+neuroal networks called feed-forward neural networks (FFNN).
+
+    Figure 3: A schematic showing a fully connected FFNN with one hidden
+layer.
+
+    \hypertarget{feed-forward-neural-network}{%
+\subsubsection{Feed-Forward Neural
+Network}\label{feed-forward-neural-network}}
+
+A FFNN is a type of artifical neural network (ANN) made up of layers of
+connected neurons, also called nodes. They consist of an input layer,
+followed by one or more so-called hidden layers, and finally an output
+layer. In each layer there is a certain number of nodes, and this number
+can vary between the layers. The nodes of one layer are connected with
+the nodes of the next with an associated weight variable. In addition
+there may be a bias in each layer. Training the model amounts to finding
+optimal values for these weights and biases.
+
+In FFNN the information flows only forward, from one layer to the next.
+If all nodes in each layer are connected to all the nodes in the next we
+have a fully connected network. According to the \emph{universal
+approximation theorem}{[}4{]}, a FFNN with just a single hidden layer
+containing a finite number of neurons can approximate a continuous
+multidimensional function to arbitrary accuracy. This result assumes
+that the activation function for the hidden layer is a non-constant,
+bounded and monotonically-increasing continuous function.{[}5{]}
+
+For a fully-connected model each input node sends its input \(x_j\) to
+every node in the first hidden layer. The input to node \(i\) of the
+first hidden layer becomes:
+
+
+\begin{equation} z_i^1 = \sum_{j=1}^{M} w_{ij}^1 x_j + b_i^1
+\end{equation}
+
+
+    Each input is weighted bu \(w_{ij}\) and in addition to the sum over the
+weighted inputs the node receives a bias contribution \(b_i^1\). This
+bias is to assure we don't end up with zero activation in a layer, as
+this would stop the flow of information from the input to the output,
+and give us no output. The ouput from node \(i\) in the first hidden
+layer is
+
+
+\begin{equation}
+ y_i^1 = f(z_i^1) = f\left(\sum_{j=1}^M w_{ij}^1 x_j  + b_i^1\right)
+\end{equation}
+
+
+where \(f(z)\) is the activation function for the hidden layer. The
+output from the nodes in the hidden layer are given as weighted inputs
+to all the nodes in the next hidden layer in the same way as described
+here for this first layer, with a (different or equal) activation
+function giving the ouput of that next layer. This continues until the
+output layer. The output from this final layer is the model layer.
+Typically the nodes in the hidden layers all have the same activation
+function, while the ouput layer has a different one.
+
+Generalizing we get the output from a model with \(l\) hidden layers as:
+
+
+\begin{equation}
+y^{l+1}_i = f^{l+1}\left[\!\sum_{j=1}^{N_l} w_{ij}^{l+1} f^l\left(\sum_{k=1}^{N_{l-1}}w_{jk}^{l}\left(\dots f^1\left(\sum_{m=1}^{M} w_{nm}^1 x_m+ b_n^1\right)\dots\right)+b_j^{l}\right)+b_i^{l+1}\right] 
+\end{equation}
+
+
+which is a nested sum of weighted activation functions.
+
+With the biases and activations as \(N_l \times 1\) column vectors
+\(\hat{b}_l\) and \(\hat{y}_l\), where the \(i\)-th element of each
+vector is the bias \(b_i^l\) and activation \(y_i^l\) of node \(i\) in
+layer \(l\) respectively, and the weights as an \(N_{l-1} \times N_l\)
+matrix, \(\mathrm{W}_l\) we can write the sum as a matrix-vector
+multiplication. Looking at hidden layer 2 for simplicity we can write
+this in matrix notation as
+
+
+\begin{equation}
+ \hat{y}_2 =  
+ f_2\left(\left[\begin{array}{cccc}
+    w^2_{11} &w^2_{12}  &\cdots &w^2_{1N_l} \\
+    w^2_{21} &w^2_{22} &\cdots &\vdots \\
+    \vdots   &\vdots   &       &\vdots \\
+    w^2_{N_{l-1}1} &w^2_{N_{l-1}2} &\cdots &w^2_{N_{l-1}N_l} \\
+    \end{array} \right] \cdot
+    \left[\begin{array}{c}
+           y^1_1 \\
+           y^1_2 \\
+           \vdots \\
+           y^1_{N_l} \\
+          \end{array}\right] + 
+    \left[\begin{array}{c}
+           b^2_1 \\
+           b^2_2 \\
+           \vdots \\
+           b^2_{N_l} \\
+          \end{array}\right]\right).
+\end{equation}
+
+
+    In general we have an expression for \(z_i^l\), the activation of node
+\(i\) of the \(l\)-th layer as
+
+\[
+z_i^l = \sum_{j=1}^{N_{l-1}}w_{ij}^la_j+b_i^l.
+\]
+
+Here \(b_i^l\) is the bias into node \(i\) in layer \(l\), \(w_{ij}^l\)
+is the weight from node \(j\) in layer \(l-1\) on the input to node
+\(i\) in layer \(l\), and \(a_j\) the output from node \(j\) in layer
+\(l-1\).
+
+The output from node \(i\) in layer \(l\) becomes
+
+\[
+a_i^l = f^l(z_i^l) = \frac{1}{1+\exp{-(z_i^l)}}.
+\]
+
+Using the sigmoid as activation function in layer \(l\).
+
+    \hypertarget{regularization}{%
+\subsection{Regularization}\label{regularization}}
+
+We will be adding an \(L_2\) regularization parameter \(\lambda\) to our
+logistic regression as well as our neural network code. See description
+of ridge regression in project 1{[}1{]} for more info on \(L_2\)
+regularization.
+
+\hypertarget{l2-regularization-ffnn}{%
+\subsubsection{L2 Regularization FFNN}\label{l2-regularization-ffnn}}
+
+when adding L2 regularixation to a feed forward neural network with
+backpropagation like we have, this amounts to adding a regularization
+term to the cost function minimizing the size of the individual weights
+in the model.
+
+\[
+C = C_0 + \frac{\lambda}{2n}\sum_w w^2
+\]
+
+where \(C_0\) is the original cost function without regularization and
+\(\lambda\) is the regularization parameter. The regularization does not
+have a dependency to the biases, so these are not affected, but the
+derivative of the cost function with respect to the weights becomes
+
+\[
+\frac{\partial C}{\partial w} = \frac{\partial C_0}{\partial w} + \frac{\lambda}{n}w.
+\]
+
+Using this the weights are updated according to
+
+\[
+w -> w\bigg(1-\frac{\gamma\lambda}{n}\bigg)-\gamma\frac{\partial C_0}{\partial w}
+\]
+
+    \hypertarget{activation-function}{%
+\subsubsection{Activation Function}\label{activation-function}}
+
+A choice must be made for the activation function to be usen in the
+nodes of the hidden layer as well as the nodes of the ouput layer. I
+will be using the sigmoid function as well ass the ReLU and Leaky ReLU
+in the hidden layers, and the softmax for the output layer when
+classifying handwritten numbers. For regression with FFNN I will use
+ReLU as the activation function for the output layer.
+
+\hypertarget{sigmoid-function}{%
+\paragraph{Sigmoid Function}\label{sigmoid-function}}
+
+This activation function is popularly used in the ouput layer of binary
+classification problems. This function is at risk for the so-called
+vanishing gradient problem; that the gradient becomes too small for
+effective model training. the function has the form
+
+\[
+f(x) = \frac{1}{1 + e^{-x}}.
+\] 
+
+A plot is seen in figure 4.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_23_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 4: Plot of the logistic sigmoid function
+    \end{Verbatim}
+
+    \hypertarget{hyperbolic-tangent-function}{%
+\paragraph{Hyperbolic Tangent
+Function}\label{hyperbolic-tangent-function}}
+
+A mathematically shifted version of the sigmoid that generally performs
+better than the sigmoid. It has the form
+
+\[
+f(x) = \tanh(x),
+\] and a plot is seen in figure 5.
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_25_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 5: Plot of the hyperbolic tangent function
+    \end{Verbatim}
+
+    \hypertarget{binary-step-function}{%
+\paragraph{Binary Step Function}\label{binary-step-function}}
+
+Also called the heaviside step function, or the unit step function. It
+is an "all or nothing" approach and jumps from 0 to 1 at \(x=0\).
+
+\[
+f(x) =
+\left\{
+    \begin{array}{ll}
+        1  & \mbox{if } x > 0 \\
+        0 & \mbox{if } x \leq 0
+    \end{array}
+\right.
+\] 
+A plot is seen in figure 6.
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_27_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 6: Plot of the binary step function
+    \end{Verbatim}
+
+    \hypertarget{relu-function}{%
+\paragraph{ReLU Function}\label{relu-function}}
+
+ReLU, or Rectified Linear Unit is a popular and fairly general
+activation function. It is a common choice for the activation function
+of the hidden layers. It is computationally cheap and therefore
+efficient. One issue is that all negative values are mapped to zero,
+which can lead to what is called \emph{dying ReLU problem}. This is an
+issue that can occur if the weighted sum of a neuron's inputs is
+negative. The neuron will then produce 0 as its output. Because the
+gradient of the ReLU function is 0 when its input is negative this is
+unlikely to change and the neuron is essentially "dead".
+
+The rectifier is defined as the positive part of its argument
+
+\[
+f(x) = x^{+} = \max(0,x).
+\] 
+
+A plot is seen in figure 7.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_29_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 7: Plot of the ReLU function
+    \end{Verbatim}
+
+    \hypertarget{leaky-relu-function}{%
+\paragraph{Leaky ReLU Function}\label{leaky-relu-function}}
+
+Leaky ReLU solves the dying ReLU problem described in the last
+subsection by assigning a small positive slope for \(x < 0\). This does
+however reduce the performance/computational cost.
+
+\[
+f(x) =
+\left\{
+    \begin{array}{ll}
+        x  & \mbox{if } x \geq 0 \\
+        0.01x & \mbox{otherwise }
+    \end{array}
+\right.
+\]
+
+See figure 8 for a plot of this function.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_31_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 8: Plot of the Leaky ReLU function. It is a bit hard to spot, but the
+slope from x=-10 to x=0 is positive.
+    \end{Verbatim}
+
+    \hypertarget{elu-function}{%
+\paragraph{ELU Function}\label{elu-function}}
+
+The ELU or exponential linear unit function is another function in the
+ReLU family proposed to avoid the \emph{dying ReLU problem}. It does
+however add another parameter to the model \(\alpha\).
+
+\[
+f(x) =
+\left\{
+    \begin{array}{ll}
+        \alpha(\exp(x)-1  & \mbox{if } x < 0 \\
+        x & \mbox{otherwise }
+    \end{array}
+\right.
+\] 
+A plot is seen in figure 9.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_33_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 9: Plot of the ELU function. I have set the paramater alpha equal to 1.
+    \end{Verbatim}
+
+    \hypertarget{softmax-function}{%
+\paragraph{Softmax Function}\label{softmax-function}}
+
+A generalization of the logistic function often used in multinomial
+logistic regression.
+
+\[
+f(x) = \frac{e^x}{\sum_{j=1}^K e^{x}},
+\]
+
+The function takes as input a vector \(x\) of \(K\) real numbers, and
+normalizes it into a probability distribution consisting of \(K\)
+probabilities proportional to the exponentials of the input numbers. See
+figure 10 for a plot.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_35_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 10: Plot of the softmax function.
+    \end{Verbatim}
+
+    \hypertarget{results-and-discussion}{%
+\section{Results and Discussion}\label{results-and-discussion}}
+
+\hypertarget{linear-regression-with-gradient-descent}{%
+\subsection{Linear Regression with Gradient
+Descent}\label{linear-regression-with-gradient-descent}}
+
+In project one we looked modeled the Franke function using ordinary
+least squares (OLS) and ridge regression. Now we want to compare these
+methods to methods using stochastic gradient descent to obtain the fit,
+i.e the parameters or weights \(\beta\).
+
+The comparison is done on data generated with the Franke function, with
+added stochastic noise with \(\sigma^2=0.1\). See figure 11 for a 3d
+plot of these data.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_37_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 11: 3D plot of the Franke function with added noise.
+    \end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+** Comparing my ols implementation with that of scikit-learn: **
+The arrays are about the same:  True
+The mean squared error between my result and that of scikit-learn is:
+2.0601779122756744e-22
+    \end{Verbatim}
+
+    We fit our regression models to this data. For OLS there are no
+parameters to tune. We find the mean square error and the \(r^2\) score
+of our OLS method, see table 1.
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Table 1: Error measures fitting OLS method to noisy Franke data.
+*** Error measures for OLS method: ***
+Train:   MSE:  0.012086801248348334   r2:  0.8644398531166579
+Test:    MSE:  0.012501297568858788   r2:  0.8583664210243516
+    \end{Verbatim}
+
+    For linear regression with gradient descent we have several parameters,
+the learning rate, the batch size, and the number of epochs. We explore
+how the error is affected by various choices for these parameters. The
+results for learning rate can be seen in figure 12. We can see that the
+error improves steadily, although somewhat erraticaly as the learning
+rate increases before exploding when we reach a too large learning rate.
+Too large is seen to be about \(\gamma>0.07\) .
+
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_44_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 12: The mean square error on the test set as the learning rate of the SGD
+method is increased.
+No regularization.
+    \end{Verbatim}
+
+    The increased error for very small learning rate can be explained by the
+SGD method taking such small steps down the slope it does not reach a
+minimum, whereas with a too large learning rate the minimum is skipped
+altogether.
+
+We can let the learning rate vary according to a learning schedule as
+described in the methods section on stochastic gradient descent. The
+results are plotted in figure 13.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_47_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 13: The mean square error for varying learning schedule.
+    \end{Verbatim}
+
+    We see that a too small value for \(\texttt{t1}\) leads to the error
+exploding, but the error also startes rising for large t1. The sweet
+spot appears to be around \(50<\texttt{t1}<200\).
+
+We also want to explore how the error is affected by the number of
+epochs used. See figure 14 for a plot. As expected the error decreases
+as the number of epochs increases. At first there is a steep
+improvement, but as we reach a few hundred epochs the rate of
+improvement has slowed down markedly and we gain very little relative to
+the increase in computational cost. Although there is some benefit to
+increasing to 1000+ epochs, whether that is worth it or not will depend
+on computation cost and precision requirements.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_50_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 14: The mean square error for increasing number of epochs.
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_52_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 15: The mean square error for increasing the batch size.
+    \end{Verbatim}
+
+    A similar plot for the choice of batchsize can be seen in figure 15. As
+we see the error explodes for small batch size, but for any batchsize
+\textgreater{} 7 or so the performance is fairly stable at a minimum. As
+the batchsize grows very big the error starts to climb up, but even at
+about 1/3 of the size of the training set the error is small. The reason
+the error starts increasing here is that the number of epochs is
+constant, so with very large batchsize we perform fewer steps per epoch
+and the increased precision of the gradient calculation does not make up
+for this reduction in steps. For very small batchsizes the estimate for
+the gradient is simply too inaccurate, and we are not guaranteed to be
+moving down the gradient slope. We see that the error increase is slight
+for the batchsized explored, but one should be careful to choose a very
+big batchsize.
+
+    We move on to look at ridge regression with gradient descent. I will be
+using k-fold cross validation to explore choices for the regression
+parameter \(\lambda\) and how this choice affects model performance.
+Figure 16 shows a heatmap of the results.
+
+        
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_56_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 16: A heatmap to illustrate how the mean square error of the ridge
+regression model with
+stochastic gradient descent depends on the choice of ridge parameter lambda and
+learning rate gamma.
+    \end{Verbatim}
+
+    We see from figure 16 that for a small enough regression parameter
+\(\lambda\), the MSE is fairly robust to the choice of the learning rate
+\(\gamma\). As \(\lambda\) grows however, the range of \(\gamma\)-values
+giving a small MSE narrows.
+
+    Now that we have found some optimal parameters for SGD on this
+particular problem, let us compare our model performance with that of
+scikit-learn's \(\texttt{SGDRegressor}\). A table of the results is seen
+in table 2.
+
+    Table 2: Comparing my own ridge regression model with SGD with
+\(\texttt{SGDRegressor}\) from \(\texttt{scikit-learn}\).
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+SGDRegressor: mse=0.0308    r2=0.6509
+Own ridge SGD: mse=0.0164    r2=0.8146
+    \end{Verbatim}
+
+    I see the error is actually better for my implementation using these
+parameter, although this method is noticeably slower. The improved error
+and at least part of the speed improvement is likely due to
+\(\texttt{SGDRegressor}\) calculating the gradient on only one datapoint
+at a time, instead of a batch{[}3{]}. This gives a noisier/more erratic
+movement towards the minimum.
+
+    \hypertarget{neural-network---regression}{%
+\subsubsection{Neural Network -
+Regression}\label{neural-network---regression}}
+
+The second of the overarching goals in this project was to use a feed
+forward neural network with backpropagation (FFNN) to model the Franke
+function. We have used the sigmoid function as activation function for
+the hidden layers, while the output layer has no activation function as
+I want the actual, continuous values, i.e.~not translated into a binary
+yes/no value or a set of classes. Cross-entropy is used as cost
+function.
+
+The network is set up with a number of input nodes matching the number
+of terms in the design matrix \(\texttt{X}\), and just one output node
+as we only have one output, z.
+
+I try out a few different configurations for the hidden layer(s). Figure
+17 shows a plot of the resulting \(r^2\) scores, all using 100 epochs
+and a batchsixe of 50. The configurations correspond to the following
+set up: * config1 = {[}21,1{]} * config2 = {[}21,5,1{]} * config3 =
+{[}21,10,1{]} * config4 = {[}21,5,2,1{]} * config5 = {[}21,5,5,1{]} *
+config6 = {[}21,10,5,1{]} * config7 = {[}21,10,10,1{]} * config8 =
+{[}21,15,10,5,1{]}
+
+which shows a list of the number of nodes per layer from input layer,
+via all the hidden layers, ending with the output layer. The model is
+tested on a set of learning rates, but the learning rate where the error
+explodes is different for the various configurations. I have plotted
+only the sensible values, so when the lines in figure 17 stop that means
+their error exploded for the next value of the learning rate \(\gamma\).
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_65_7.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    Figure 17: \(R^2\) score on test set for a selection of architectures
+for the neural network. For all models the logistic sigmoid is used in
+the hidden layers, cross entropy is the cost function. The models are
+fitted over 100 epochs with a batchsize of 50.
+
+    Of the network architectures tried, the optimal seems to be
+configuration number 6 with two hidden layers, one with 10 nodes and one
+with 5. We will use this configuration from here on.
+
+We do, however, see that performance is fairly stable for the majority
+of the tested configurations. Configuration 1 (no hidden layers) seems to be
+particularly sensitive to the choice of learning rate, but apart from
+this they are all in agreement on the optimal range for the learning
+rate. In addition the optimal choice of the learning parameter gives
+fairly similar values for the \(r^2\) score. It is worth noting that the
+parameters such as number of epochs and batch size has not been
+exhaustively explored for all the configurations shown. As such some are
+likely to have even better `optimal' \(r^2\) scores for different
+hyper-parameters.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_69_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+   
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 18: How the performance of the FFNN regression model on the franke data
+changes with the learning rate.
+One hidden layer with 10 nodes, and one with 5. The batchsize is 50 and the
+number of epochs is 100. The hidden
+layer uses the sigmoid activation function and the output layer uses no
+activation function.
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_72_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 19: How the performance of the FFNN regression model on the franke data
+changes with the number of
+epochs. One hidden layer with 10 nodes, one with 5. The batchsize is 100 and the
+learning rate is 0.8. The
+hidden layer uses the sigmoid activation function and the output layer uses no
+activation function.
+    \end{Verbatim}
+
+    Figure 18 shows the \(r^2\) score as a function of the number of epochs
+using configuration 6. We see the \(r^2\) score improves with increasing
+the number, as expected, but from 100 epochs and on it flattens out and
+no further improvement is seen, meaning increasing the number above this
+will increase the computational cost at minimal to no additional gain in
+performance.
+
+Next up is the batch size, as seen in the plot in figure 19. Even for
+small batch sizes the performance here is good, we don't see the same
+sensitivity we saw using linear regression with SGD, but we get a
+similar dip for very large batch sizes. Note that the training set has
+7500 entries, so a batch size of 500 (the first data point where we see a
+reduction in the r2 score) is about \(7\%\) of the total training set.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_75_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 19: How the performance of the FFNN regression model on the franke data
+changes with the size of
+the batches used in the stochastic gradient descent. One hidden layer with 10
+nodes, one with 5. The number of epochs
+is 100 and the learning rate is 0.8. The hidden layer uses the sigmoid
+activation function and the output layer uses
+no activation function.
+    \end{Verbatim}
+
+    \hypertarget{adding-l2-regularization}{%
+\paragraph{Adding L2 Regularization}\label{adding-l2-regularization}}
+
+We now explore adding regularization to the method, namely l2
+regularization. First we look at the choice of the regularization
+parameter \(\lambda\) searching for an optimized value. Figure 21 shows
+a plot.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_78_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 21: How the performance of the FFNN regression model on the franke data
+changes with the strength/weight
+of the l2 regularization. Model with one hidden layer with 10 nodes, one with 5.
+The number of epochs is 100 and
+the learning rate is 0.8. The hidden layer uses the sigmoid activation function
+and the output layer uses none.
+    \end{Verbatim}
+
+    \hypertarget{different-activation-functions}{%
+\paragraph{Different Activation
+Functions}\label{different-activation-functions}}
+
+There are several available options for the activation function of the
+nodes in the hidden layers. Figure 22 shows a plot of the r2 score for
+models when the shape of this activation function is altered. Again the
+error explodes at different values for the learning rate for the
+different activation functions, and we have avoided plotting the
+exploding scores, which is why the plots are over differing ranges of
+the learning rate. We see from figure 22 that ReLU, ELU and the sigmoid
+all give similar performance, while leaky ReLU seems to struggle more
+with the learning rate. The sigmoid gives the best \(r^2\) score for the
+chosen parameters, but ReLU is seen to be somewhat more robust to the
+choice of learning rate.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_81_3.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    Figure 22: R2 score on test set for a selection of activation functions
+used in the hidden layers of the neural network. For all models cross
+entropy is the cost function and the network architecture is as in
+config6. The models are fitted over 100 epochs with a batch size of 50
+
+    Now that we have optimized our parameters to an extent, we compare the
+performance of this model with that of the \(\texttt{MLPRegressor}\) in
+\(\texttt{scikit-learn}\). The results can be seen in table 3. For both
+models we used a learning rate of \(0.75\), a batch size of \(50\), and
+\(100\) epochs. We see that the resulting errors are almost identical.
+
+    Table 3: Comparing my own FFNN regression model with
+\(\texttt{MLPRegressor}\) from \(\texttt{scikit-learn}\). Both use with
+SGD and the logistic sigmoid function as activation function for the
+hidden layers.
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Own FFNN Regressor with SGD:                 mse=0.0110    r2=0.8752
+MLPRegressor from scikit-learn with SGD:     mse=0.0116    r2=0.8691
+    \end{Verbatim}
+
+    \hypertarget{neural-network---classification}{%
+\subsubsection{Neural Network -
+Classification}\label{neural-network---classification}}
+
+We move on to look at using our neural network for classification. We
+use the FFNN model to perform classification of handwritten numbers.
+First we classify the numbers using \(\texttt{scikit-learn}\)'s
+\(\texttt{MLPClassifier}\) to have something to compare the next results
+to. The network is set up with 64 input nodes, corresponding to the 64
+pixels in each digit image, one layer of 30 hidden nodes, and finally an
+output layer of 10 nodes, corresponding to the 10 output possibilities.
+The activation function of the output layer is the softmax, while the
+hidden layer(s) use the sigmoid. We are not using regularization here.
+Note that the \(\texttt{MLPClassifier}\) implicitly designs the input
+and output layers based on the provided data in \(\texttt{fit()}\)
+method. It uses cross-entropy as the default cost function.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+The measured accuracy of FFNN on the test set using scikit-learn's MLPClassifier
+is 0.9778
+    \end{Verbatim}
+
+    We get a very impressive accuracy score of \(\approx0.98\) using
+\(\texttt{scikit-learn}\). We compare this with our own code which gives
+a very similar result of \(\approx0.99\) using 30 epochs and a learning
+rate of 0.5.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+The measured accuracy of FFNN on the test set using our nown NeuralNetClassifier
+with one hidden layer of 30 nodes, softmax activation function in the output
+layer
+and sigmoid in the hidden layer is: 0.9889
+    \end{Verbatim}
+
+    Like for regression we are interested in exploring a few different
+configuartions or network architectures. Figure 23 shows a plot of how
+the resulting accuracy for a selection of configurations varies with the
+choice of learning rate. The tested configurations are:
+
+\begin{itemize}
+\tightlist
+\item
+  config1 = {[}64,10{]}
+\item
+  config2 = {[}64,10,10{]}
+\item
+  config3 = {[}64,30,10{]}
+\item
+  config4 = {[}64,10,10,10{]}
+\item
+  config5 = {[}64,30,30,10{]}
+\item
+  config6 = {[}64,50,40,30,10{]}
+\item
+  config7 = {[}64,50,40,30,20,10{]}
+\end{itemize}
+
+We see from the plot that for all the configuration the general behavior
+is the same. The performance improves with the increasing learning rate
+up to a point. The differences relate to how high the accuracy gets, and
+how soon it responds to the increase in learning rate. The drop off
+learning rate is similar for all the architectures. Even configuration 1
+performs really well, despite not having any hidden layers. It is
+however the most sensitive to too high learning rate. In contrast it
+seemingly handles small learning rates better than the others. Based on
+figure 23 configuration 3 seems a solid choice, but any of configuration 1, 2, 3
+and 5 display a satisfactory performance and stability.
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_94_3.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    Figure 23: A plot showing how the model accuracy of our FFNN model for
+classification when identifying handwritten digits for a selection of
+network architectures. Batch size is 100 and the number of epochs is 30.
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_98_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 24: How accuracy of the FFNN classification model changes with the number
+of epochs. One hidden layer with 30 nodes, batchsize is 100 and the learning
+rate is 0.5. The hidden layer uses the sigmoid activation function and the
+output layer uses the softmax.
+    \end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+The max accuracy on the test set is 0.994444 after 25 epochs.
+    \end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_101_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 25: How accuracy of the FFNN classification model changes with the
+learning rate. One hidden layer with 30 nodes, batchsize is 100 and the number
+of epochs is 100. The hidden layer uses the sigmoid activation function and the
+output layer uses the softmax.
+    \end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_103_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 26: How accuracy of the FFNN classification model changes with the
+batch size. One hidden layer with 30 nodes, larning rate is 0.5 and the number
+of epochs is 100. The hidden layer uses the sigmoid activation function and the
+output layer uses the softmax.
+    \end{Verbatim}
+
+    \hypertarget{adding-regularization}{%
+\paragraph{Adding Regularization}\label{adding-regularization}}
+
+To avoid over-fitting and increase the generalization of a model one can
+add a regularization term. As we have seen in the results so far we
+don't appear too troubled by over-fitting in our classification model
+with our current parameters. Adding regularization can also make the
+model more stable to changes in these parameters.
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_106_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 27: The FFNN classification model with added l2 regularization. One
+hidden layer with 30 nodes, learning
+rate is 0.5 and the number of epochs is 100. The hidden layer uses the sigmoid
+activation function and the output
+layer uses the softmax.
+    \end{Verbatim}
+
+    \hypertarget{logistic-regression---classification}{%
+\subsubsection{Logistic Regression -
+Classification}\label{logistic-regression---classification}}
+
+So far we have used a FFNN neural network for classification. We want to
+compare our results with a different method. The method of choice is
+logistic regression. As we are performing classification to multiple
+classes (not binary classification) we use the softmax in place of the
+standard sigmoid. This form of logistic regression is called multinomial
+logistic regression or simply softmax regression. Our cost function is
+again cross-entropy.
+
+We have our own code for this as well, but first we attempt
+classification of our digit data with \(\texttt{scikit-learn}\)'s
+\(\texttt{SGDClassifier}\). Setting the \(\texttt{loss}\) parameter of
+this method to `log' gives a logistic regression for classification with
+SGD as training method.
+
+When fitting the \(\texttt{SGDClassifier}\)-model to the training set of
+the digits data and using the fitted model to predict the digits based
+on the input values of the test set we get an accuracy score of
+\(0.95\). This is exactly the same score that we achieve from our own
+logistic regression code for multinomial regression with stochastic
+gradient descent. For both models the learning rate was \(0.1\).
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Accuracy when using SGDClassifier with 'log'-loss on digits-data is: 0.95
+    \end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Accuracy when using own code for logistic regression with SGD on digits-data is:
+0.95
+    \end{Verbatim}
+
+    Figure number shows a plot of how the accuracy after on the test set
+varies with the chosen learning rate. We see a similar behavior as
+before, with very small and very large learning rates resulting in a
+poor accuracy score. While the performance of the two methods is very
+similar in the middle range of the learning rates it is interesting to
+see that \(\texttt{SGDClassifier}\) seems to be less sensitive to the
+choice of learning rate.
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_112_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+ 
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Figure 28: Accuracy on the test set of the digits dataset for varying
+learning rate on multinomial
+logistic regression with stochastic gradient descent when the methods are fitted
+to the corresponding training set.
+    \end{Verbatim}
+
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_116_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    Figure number: The FFNN classification model with added l2
+regularization. One hidden layer with 30 nodes, learning rate is 0.5 and
+the number of epochs is 100. The hidden layer uses the sigmoid
+activation function and the output layer uses the softmax.
+
+    \hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+
+\end{Verbatim}
+\end{tcolorbox}
+
+    \hypertarget{bibliography}{%
+\section{Bibliography}\label{bibliography}}
+
+{[}1{]} Project 1:
+https://github.com/emiliefj/FYS-STK3155/blob/master/Project1/Report/Project\%201\%20-\%20FYS-STK3155.pdf
+
+{[}2{]} Digits dataset in scikit-learn:
+https://scikit-learn.org/stable/auto\_examples/datasets/plot\_digits\_last\_image.html
+
+{[}3\}
+https://www.bogotobogo.com/python/scikit-learn/scikit-learn\_batch-gradient-descent-versus-stochastic-gradient-descent.php
+
+{[}4{]} Universal approximation theorem:
+https://en.wikipedia.org/wiki/Universal\_approximation\_theorem
+
+{[}5{]} Slides week 40:
+https://compphysics.github.io/MachineLearning/doc/pub/week40/html/week40.html
+
+{[}6{]} Softmax function:
+https://en.wikipedia.org/wiki/Softmax\_function
+
+{[}7{]} Neural Networks and classification of handwritten digits:
+http://neuralnetworksanddeeplearning.com
+
+{[}8{]} Softmax Regression tutorial:
+http://saitcelebi.com/tut/output/part2.html
+
+{[}9{]} Standford Softmax Regression tutorial:
+http://deeplearning.stanford.edu/tutorial/supervised/SoftmaxRegression/
+    
+    
+    
+\end{document}
