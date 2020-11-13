@@ -14,17 +14,8 @@ class LogisticRegression():
         self.lmda = lmda 
         self.decay = decay
 
-    def initialize(self,m,n):
-        self.weights = np.random.randn(m, n)/np.sqrt(n)
-        #self.biases = np.random.randn(m, 1)
 
-        
-    def feed_forward(self):
-        z = np.dot(W, x) + b
-        a = self.softmax(z)
-
-
-    def sgd(self, X, y, n_epochs, batchsize, learning_rate, t0, t1, n_classes=10, test_data=None, print_epochs=False):
+    def sgd(self, X, y, n_epochs, batchsize, learning_rate, t0=1, t1=10, n_classes=10, test_data=None, print_epochs=False):
         '''
 
         X       - predictors/inputs
@@ -35,28 +26,36 @@ class LogisticRegression():
         t0, t1          - parameters for gradually decreasing step size.
                           only used if self.decay=True
         n_classes       - the number of classes/digits to in the dataset
-        
+
         '''
         # initialize
-        n = len(X)
-        n_batches = int(len(X)/batchsize)
+        n, p = X.shape
+        self.betas = np.zeros([p,n_classes])#np.random.randn(p,n_classes)/np.sqrt(n)#np.zeros([p,n_classes]) #
+        n_batches = int(n/batchsize)
         if(test_data):
             X_test, y_test = zip(*test_data)
             n_test = len(X_test)
-        if(y.ndim==1): # only for classification of 10 things. Make optional, and more general (i.e. varying number of outputs)
+        if(y.ndim==1): # transform each yi to a vector with length n_classes
            y = np.array([self._vector_transform(yi,n_classes) for yi in y])
-        #beta_0 = np.random.randn(len(self.X[0]),1) # Make initial guess for beta
-        for i in range(0,self.n_epochs):
+
+        for i in range(0,n_epochs):
             for b in range(0,n_batches):
                 # fetch X and y of current mini-batch
-
                 batch = np.random.randint(n,size=batchsize)
                 current_X = X[batch]
-                current_z = z[batch].reshape(batchsize,1)
+                current_y = y[batch] # .reshape(batchsize,1)
                 # calculate gradient
-                gradient = (current_X.T.dot(current_X.dot(beta_0)-current_z))*2/batchsize-self.alpha*(beta_0)
-                beta_0 = beta_0-self.learning_schedule(t0,t1,i*n_batches+b)*gradient 
-        return beta_0
+                gradient = self.gradient(current_X,current_y,batchsize,n_classes)#.reshape((-1, 1))
+                self.betas = (1-learning_rate*self.lmda)*self.betas-learning_rate*gradient
+            # if test_data:
+            #     print("Epoch {}: Measured {}: {}".format(i+1, self.metric, self.evaluate_accuracy(X_test, y_test)))
+            #print(self.betas[0])
+            if print_epochs:
+                # Testing on a small selection of the training data to not slow down too much
+                #print("Epoch {}: {} / {} (on training data)".format(j+1, self.evaluate_accuracy(zip(X[accuracy_batch],y[accuracy_batch])), batchsize))
+                print("Epoch {} complete".format(i+1))
+        #self.betas = betas # storing the betas/weights
+        return self.betas
 
     def learning_schedule(self, t0, t1, t):
         if self.decay:
@@ -64,12 +63,41 @@ class LogisticRegression():
         else:
             return self.learning_rate
 
+    def gradient(self, X, y, n, n_classes):
+        # calculate gradient  dC/d\beta
+        #pred = self.predict(X)
+        # make an array of length n_classes with the predicted digit 
+        # giving the index where the array has 1. All other entries are 0
+
+        #diff = np.zeros(len(y))
+        #for i in range(len(y)):
+            # if pred[i] is correct diff is 1
+        #    diff[i] = y[i][pred[i]]
+
+        prob = self.softmax(np.dot(X, self.betas))
+        diff = (y-prob)
+        #print("prob: ", prob)
+        #print("gradient: ",diff)
+        return  (-1/n)*np.dot(X.T,diff)
+
+
+    def predict(self, X):
+        '''
+        Use the trained model to predict the output/classification
+        from the input X.
+        '''
+        prob = self.softmax(np.dot(X, self.betas))
+        return np.argmax(prob, axis=1)
+        #return [np.argmax(self.softmax(np.dot(self.betas, x))) for x in X]
+
     def softmax(self, z):
         '''
         numerically stable softmax function avoiding overflow issues
         [8]
         '''
-        return np.exp(z-max(z)) / np.sum(np.exp(z-max(z)))
+        #exponent = np.exp(z-np.max(z))
+        exponent = np.exp(z)
+        return  exponent/np.sum(exponent, axis=1, keepdims=True)
 
     def _vector_transform(self,i,k):
         ''''
@@ -92,6 +120,11 @@ def accuracy(pred, actual):
     actual  - the actual value in the data 
     '''
     n = len(pred)
-    correctly_predicted = sum(int(y == t) for (y, t) in zip(pred,actual))
+    correctly_predicted = 0
+    #correctly_predicted = sum(int(y == t) for (y, t) in zip(pred,actual))
+    for i in range(n):
+        if(pred[i]==actual[i]):
+            correctly_predicted += 1
+
 
     return correctly_predicted/n
