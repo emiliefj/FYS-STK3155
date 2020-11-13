@@ -381,13 +381,28 @@
     
     \hypertarget{abstract}{%
 \section{Abstract}\label{abstract}}
+In this second project our goal has been to study gradient descent methods, logistic regression, and neural networks. With these methods we have explored classification and regression problems looking at the same Franke data we saw in project one as well as a new dataset consisting of handwritten digits. We have explored how gradient descent methods are a useful and general solution for finding the minimum of our cost function and as such optimize a model. In coding the solutions we have seen first hand the similarities, and differences, of logistic regression and regression with a feed forward neural network.
 
-    We have explored
+We have seen how our neural network code is a versatile tool for solving many different problems, from regression to multinomial classification, and how we can modify the architecture of such a network to fit it to the problem at hand. 
+
+We have found our neural network code to outperform our linear regression methods from project 1, ordinary least squares, ridge and lasso when fitting the models to the noisy Franke data, and we have seen the same model (with a different architecture and various choices for the hyper-parameters) outperform logistic regression classifying a series of handwritten digits.
+
+In fitting our models we have seen that it is necessary to put a lot of work into selecting the optimal hyper-parameters in order to achieve the optimal performance. We have seen that some models are very sensitive to the choice of certain parameters, like the learning rate, and selecting one outside of the optimal range can give very poor results. 
+
+Especially for neural networks, where the number of hyper-parameters to tune can be astronomical, finding good choices can be very challenging. 
+
 
     \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
+In machine learning, once you know your data, the key question is what model to use to best represent these data. This is no trivial task, and while the advances in the field since its infancy in the 1960's or so have given rise to a plethora of useful and amazing models and techniques have given us many great tools for the task, finding the optimal choice can be a challenge.
 
-    
+Familiarity with the data to model is key in making this decision, and likely to give you a good first selection in possible models and techniques to employ. Once this is done a natural choice is to try out the most promising subset of models on the test data to see how they perform. With the increasing complexity of many models, particularly neural networks, testing a model on the data is not necessarily a trivial task however. The models able to solve the most difficult tasks and model the most complex data tend to have a very large set of parameters to tune, including making choices for things like the network architecture (for neural networks), the choice of cost functions, etc. 
+
+With sub-optimal parameters what woul actually be a great model choice can look like a a complete miss when applying it to the data at hand, and finding good parameters for every model type considered is rarely feasible. This situation highlights one of the key issues when employing machine learning in your field of choice, and while it is not a trivial one, putting in the work may yield impressive results.
+
+Another issue when adjusting large amounts of parameters in a complex machine learning model is that understanding the model and how it draws insight from the input data becomes very difficult, and sometimes even impossible. This is a clear drawback of overly complex model. In a scientific setting when trying to understand some system our suggestion is therefore to prioritize simpler models whenever they produce satisfactory results. If however the goal is simply predictory, for instance for a machine scanning post addresses containing handwritten numbers te see where mail should be sent, prioritizing performance is natural.
+
+In this project we look at a few models, namely our set of linear models from project one, logistic regression, and a feed forward neural network. We fit the different hyper-parameters for the models and study their performance. What we find is that while adjusting hyper-parameters is not trivial, and probably not considered the most exciting task, it does pay dividends in our results.
 
     \hypertarget{data}{%
 \section{Data}\label{data}}
@@ -404,7 +419,7 @@ refer to the report for project 1 {[}1{]}
 
 For our classification problem we will be using the MNIST database of
 handwritten numbers, or more specifically a subset of this available as
-the digits dataset in scikit-learn{[}2{]}.
+the digits dataset in $\texttt{scikit-learn}${[}2{]}.
 
 This dataset contains pixel images of handwritten numbers. In total the
 digits dataset contains 1797 8x8 images. Meaning we have a dataset
@@ -424,7 +439,7 @@ Figure 1: Plot of one of the entries in the digits dataset showing a number 0.
 
     We will use this dataset to fit and test our classification models. To
 prepare the data we split it into a training set and a test set. I use
-\(\texttt{scikit\-learn}\)'s \(\texttt{train\_test\_split}()\) for this and
+\(\texttt{scikit-learn}\)'s \(\texttt{train\_test\_split}()\) for this and
 an 80-20 split.
 
 
@@ -1306,18 +1321,18 @@ reduction in the r2 score) is about \(7\%\) of the total training set.
     
     \begin{Verbatim}[commandchars=\\\{\}]
 Figure 19: How the performance of the FFNN regression model on the franke data
-changes with the size of
-the batches used in the stochastic gradient descent. One hidden layer with 10
-nodes, one with 5. The number of epochs
-is 100 and the learning rate is 0.8. The hidden layer uses the sigmoid
-activation function and the output layer uses
-no activation function.
+changes with the size of the batches used in the stochastic gradient descent. One 
+hidden layer with 10 nodes, one with 5. The number of epochs is 100 and the 
+learning rate is 0.8. The hidden layer uses the sigmoid activation function 
+and the output layer uses no activation function.
     \end{Verbatim}
+
 
     \hypertarget{adding-l2-regularization}{%
 \paragraph{Adding L2 Regularization}\label{adding-l2-regularization}}
 
-We now explore adding regularization to the method, namely l2
+
+ We now explore adding regularization to the method, namely l2
 regularization. First we look at the choice of the regularization
 parameter \(\lambda\) searching for an optimized value. Figure 21 shows
 a plot.
@@ -1329,11 +1344,10 @@ a plot.
     
     \begin{Verbatim}[commandchars=\\\{\}]
 Figure 21: How the performance of the FFNN regression model on the franke data
-changes with the strength/weight
-of the l2 regularization. Model with one hidden layer with 10 nodes, one with 5.
-The number of epochs is 100 and
-the learning rate is 0.8. The hidden layer uses the sigmoid activation function
-and the output layer uses none.
+changes with the strength/weight of the l2 regularization. Model with one hidden 
+layer with 10 nodes, one with 5. The number of epochs is 100 and the learning 
+rate is 0.8. The hidden layer uses the sigmoid activation function and the
+output layer uses none.
     \end{Verbatim}
 
     \hypertarget{different-activation-functions}{%
@@ -1593,12 +1607,6 @@ activation function and the output layer uses the softmax.
     \hypertarget{conclusion}{%
 \section{Conclusion}\label{conclusion}}
 
-    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{ }{\boxspacing}
-\begin{Verbatim}[commandchars=\\\{\}]
-
-\end{Verbatim}
-\end{tcolorbox}
 
     \hypertarget{bibliography}{%
 \section{Bibliography}\label{bibliography}}
