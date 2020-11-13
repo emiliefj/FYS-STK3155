@@ -7,7 +7,9 @@ class LogisticRegression():
     stochastic gradient desctent (SGD).
 
     lmda    - regression parameter l2 regularization
-
+    decay   - if True the learning rate decays as we progress through
+              the epochs
+    seed    - seed for numpy.random for reproduceability
     '''
     def __init__(self, lmda=0, decay=False, seed=687):
         np.random.seed(seed)
@@ -15,8 +17,11 @@ class LogisticRegression():
         self.decay = decay
 
 
-    def sgd(self, X, y, n_epochs, batchsize, learning_rate, t0=1, t1=10, n_classes=10, test_data=None, print_epochs=False):
+    def sgd(self, X, y, n_epochs, batchsize, learning_rate, t0=1, t1=10, n_classes=10, print_epochs=False):
         '''
+        Trains the logistic regression model according to the input 
+        data using stochastic gradient descent to gradually move 
+        down the gradient of the cost function.
 
         X       - predictors/inputs
         y       - output
@@ -26,15 +31,14 @@ class LogisticRegression():
         t0, t1          - parameters for gradually decreasing step size.
                           only used if self.decay=True
         n_classes       - the number of classes/digits to in the dataset
+        print_epochs    - if True a line is printed at the end of each epoch
+                          to keep track of progress
 
         '''
         # initialize
         n, p = X.shape
-        self.betas = np.zeros([p,n_classes])#np.random.randn(p,n_classes)/np.sqrt(n)#np.zeros([p,n_classes]) #
+        self.betas = np.random.randn(p,n_classes)/np.sqrt(n)#np.zeros([p,n_classes]) #
         n_batches = int(n/batchsize)
-        if(test_data):
-            X_test, y_test = zip(*test_data)
-            n_test = len(X_test)
         if(y.ndim==1): # transform each yi to a vector with length n_classes
            y = np.array([self._vector_transform(yi,n_classes) for yi in y])
 
@@ -43,18 +47,14 @@ class LogisticRegression():
                 # fetch X and y of current mini-batch
                 batch = np.random.randint(n,size=batchsize)
                 current_X = X[batch]
-                current_y = y[batch] # .reshape(batchsize,1)
+                current_y = y[batch] 
                 # calculate gradient
-                gradient = self.gradient(current_X,current_y,batchsize,n_classes)#.reshape((-1, 1))
+                gradient = self.gradient(current_X,current_y,batchsize)
+                # update beta
                 self.betas = (1-learning_rate*self.lmda)*self.betas-learning_rate*gradient
-            # if test_data:
-            #     print("Epoch {}: Measured {}: {}".format(i+1, self.metric, self.evaluate_accuracy(X_test, y_test)))
-            #print(self.betas[0])
             if print_epochs:
-                # Testing on a small selection of the training data to not slow down too much
-                #print("Epoch {}: {} / {} (on training data)".format(j+1, self.evaluate_accuracy(zip(X[accuracy_batch],y[accuracy_batch])), batchsize))
                 print("Epoch {} complete".format(i+1))
-        #self.betas = betas # storing the betas/weights
+
         return self.betas
 
     def learning_schedule(self, t0, t1, t):
@@ -63,23 +63,12 @@ class LogisticRegression():
         else:
             return self.learning_rate
 
-    def gradient(self, X, y, n, n_classes):
-        # calculate gradient  dC/d\beta
-        #pred = self.predict(X)
-        # make an array of length n_classes with the predicted digit 
-        # giving the index where the array has 1. All other entries are 0
-
-        #diff = np.zeros(len(y))
-        #for i in range(len(y)):
-            # if pred[i] is correct diff is 1
-        #    diff[i] = y[i][pred[i]]
-
+    def gradient(self, X, y, n):
+        '''
+        calculate gradient dC/d\beta on the inputted batch X,y
+        '''
         prob = self.softmax(np.dot(X, self.betas))
-        diff = (y-prob)
-        #print("prob: ", prob)
-        #print("gradient: ",diff)
-        return  (-1/n)*np.dot(X.T,diff)
-
+        return  (-1/n)*np.dot(X.T,(y-prob))
 
     def predict(self, X):
         '''
@@ -87,8 +76,6 @@ class LogisticRegression():
         from the input X.
         '''
         prob = self.softmax(np.dot(X, self.betas))
-        return np.argmax(prob, axis=1)
-        #return [np.argmax(self.softmax(np.dot(self.betas, x))) for x in X]
 
     def softmax(self, z):
         '''

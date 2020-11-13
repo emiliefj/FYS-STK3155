@@ -2,10 +2,17 @@ import numpy as np
 import warnings
 
 class NeuralNet():
-    """docstring for NeuralNet
+    """
+    A feed forward neural network for regression with a flexible 
+    number of nodes in each layer, and a flexible number of 
+    hidden layers.
+    Stochastic gradient descent with backpropagation is used to 
+    train the model.
+    Readability is prioritized over speed.
+    
     inspired by http://neuralnetworksanddeeplearning.com/
 
-    leyers_list - the number of nodes per layer in an ordered list
+    layers_list - the number of nodes per layer in an ordered list
     h_af        - the activation function used for the hidden neurons
                   available options: 
                   - 'sigmoid': logistic sigmoid function
@@ -60,9 +67,15 @@ class NeuralNet():
         update weights and biases. The learning rate sets the step size.
         Prints a line at the end of each epoch to keep track of progress.
 
-        X   - array of inputs
-        y   - array of targets
-
+        X               - array of inputs
+        y               - array of targets
+        n_epochs        - the number of epochs to train the model for
+        learning_rate   - the step size gamma
+        test_data       - allows the ability to add a separate set of
+                          test data to monitor progress of the model
+                          for each epoch
+        print_epochs    - if True a line is printed at the end of every 
+                          epoch to track progress
         """
         if(test_data):
             X_test, y_test = zip(*test_data)
@@ -108,12 +121,11 @@ class NeuralNet():
                        for b, nb in zip(self.biases, nabla_b)]
 
     def backprop(self, x, y):
-
         """ Perform backpropagation to find change in weights and biases
 
         Performs feedforward computing output at each layer. Then
-        computes the error in the outputlayer and propagates
-        back trhough the layer calculating output error. Finds
+        computes the error in the output layer and propagates
+        back through the layer calculating output error. Finds
         the change dw and db for each weight and bias, aka dC/dw
         and dC/db. 
 
@@ -140,7 +152,6 @@ class NeuralNet():
         # backward pass #
         db = [np.zeros(b.shape) for b in self.biases]
         dw = [np.zeros(w.shape) for w in self.weights]
-        #delta = self.cost_derivative(activations[-1], y)*self.o_af_derivative(zs[-1])
         delta = self.calculate_delta(zs[-1], activation, y)
         # output error delta^L in output layer
         db[-1] = delta
@@ -153,9 +164,9 @@ class NeuralNet():
             dw[-l] = np.dot(delta, activations[-l-1].T)
         return (db, dw)
 
-    def predict(self,X): # different for classification vs regression
+    def predict(self,X):
         return [self.feedforward(x) for x in X]
-        #return [np.argmax(self.feedforward(x)) for x in X]
+ 
 
     def evaluate_accuracy(self, X, y):
         pred = [self.feedforward(x) for x in X]
