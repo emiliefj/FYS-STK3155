@@ -4,7 +4,8 @@ import warnings
 class LogisticRegression():
     '''
     A class for performing logistic regression for classification using
-    stochastic gradient desctent (SGD).
+    stochastic gradient descent (SGD). The cost function used is cross-
+    entropy.
 
     lmda    - regression parameter l2 regularization
     decay   - if True the learning rate decays as we progress through
@@ -37,7 +38,7 @@ class LogisticRegression():
         '''
         # initialize
         n, p = X.shape
-        self.betas = np.random.randn(p,n_classes)/np.sqrt(n)#np.zeros([p,n_classes]) #
+        self.betas = np.random.randn(p,n_classes)/np.sqrt(n)#np.zeros([p,n_classes])
         n_batches = int(n/batchsize)
         if(y.ndim==1): # transform each yi to a vector with length n_classes
            y = np.array([self._vector_transform(yi,n_classes) for yi in y])
@@ -79,8 +80,8 @@ class LogisticRegression():
 
     def softmax(self, z):
         '''
-        numerically stable softmax function avoiding overflow issues
-        [8]
+        softmax function for finding the propabilities and making
+        predictions.
         '''
         #exponent = np.exp(z-np.max(z))
         exponent = np.exp(z)
@@ -108,7 +109,6 @@ def accuracy(pred, actual):
     '''
     n = len(pred)
     correctly_predicted = 0
-    #correctly_predicted = sum(int(y == t) for (y, t) in zip(pred,actual))
     for i in range(n):
         if(pred[i]==actual[i]):
             correctly_predicted += 1
