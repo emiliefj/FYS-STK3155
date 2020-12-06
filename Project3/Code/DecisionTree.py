@@ -1,5 +1,6 @@
 import numpy as np 
 import pandas as pd
+import matplotlib.pyplot as plt
 
 class DecisionTree():
 
@@ -15,11 +16,110 @@ class Node():
 
     '''
     def __init__(self, feature, threshold):
+        
+
         self.feature = feature
         self.threshold = threshold
         self.right = None
         self.left = None
+
+        self.depth = None
+        self.leaf = None
         pass
+
+
+    def find_split(self):
+        start_impurity = self.find_impurity()
+        split_threshold, split_feature, split_impurity
+        for each feature in self.input_data:
+            for each unique_value in feature:
+                threshold = value
+                impurity = self.find_impurity()
+                if impurity is better than split_impurity:
+                    split_threshold = threshold
+                    split_impurity = impurity
+                    split_feature = feature
+        self.split_node(split_feature, split_threshold, self.input_data, target)
+
+    def find_impurity(self):
+
+        pass
+
+    def split_node(self,split_feature, split_threshold, input_data, target):
+        pass
+
+
+class DecisionTree():
+    '''
+    A decision tree for classification.
+
+
+    '''
+    def __init__(self, impurity_measure='gini', max_depth=5, min_samples_leaf=1, max_leaf_nodes=20):
+        
+        self.measure = impurity_measure.lower()
+        self.max_depth = max_depth
+        self.min_samples_leaf = min_samples_leaf
+        self.max_leaf_nodes = max_leaf_nodes
+
+        self.tree = None
+
+    def fit(self, X, y):
+        '''
+        Builds a tree with the given data
+
+        X   - the input data/features 
+        y   - the target values
+        '''
+        self.X = X
+        self.y = y
+
+    def predict(self, X_test):
+        '''
+        Finds the predicted class of the data in X_test using
+        the built decision tree
+
+        X_test  - the test data to make prediciton for
+        '''
+        if not self.tree:
+            #throw error
+            return None
+        pass
+
+    def predict_probabilities(self, X_test):
+        '''
+        Finds the predicted probabilities for the data in X_test 
+        using the built decision tree.
+
+        X_test  - the test data to make prediciton for
+        '''
+        if not self.tree:
+            #throw error
+            return None
+        pass
+
+    def build_tree(self):
+        pass
+
+    def impurity(self):
+        '''
+        Calculates the impurity using the chosen impurity measure
+        '''
+        if(self.measure=='gini'):
+            return self.gini_index()
+
+        return
+
+    def gini_index(self):
+        '''
+        Calculate the gini index/gini impurity
+
+        gini = 1-sum(probabilities)
+        '''
+        pass
+
+
+
 
 
 def gini_index_matrix(feature, input_data, target):
@@ -44,7 +144,7 @@ def gini_index_matrix(feature, input_data, target):
         classes, n_k = np.unique(target[indexes],  return_counts=True) 
         gi = 1-1/(N_k**2)*np.sum(n_k**2)
         gini  = gini + gi*N_k
-        # print(gi)
+        print(gi)
 
     return gini/N
 
@@ -73,7 +173,7 @@ def gini_index_dataframe(feature, data, target):
         n_k = np.array(current_data[target].value_counts().tolist())
         gi = 1-1/(N_k**2)*np.sum(n_k**2)
         gini  = gini + gi*N_k
-        # print(gi)
+        print(gi)
 
     return gini/N
 
@@ -84,9 +184,9 @@ def entropy():
 def p_mk():
     pass
 
-if __name__ == '__main__':
+def test_run():
     df = pd.read_csv("go_for_run.csv", sep=",")
-    print(gini_index_dataframe('Outlook',df,'Decision'))
+    print(gini_index_dataframe('Humidity',df,'Decision'))
 
     target = df['Decision'].to_numpy()
     matrix = df.drop(['Decision'], axis=1).to_numpy()
@@ -95,7 +195,21 @@ if __name__ == '__main__':
     print(df)
     print()
 
-    print(gini_index_matrix(0, matrix, target))
+    print(gini_index_matrix(2, matrix, target))
+
+if __name__ == '__main__':
+    
+    import seaborn as sns
+    from sklearn.datasets import load_iris
+
+    data = load_iris()
+    X,y,features = data['data'], data['target'],data['feature_names']
+
+    df = pd.DataFrame(X,columns=features)
+    df['target'] = y
+
+    # sns.pairplot(df)
+    # plt.show()
 
 
 
