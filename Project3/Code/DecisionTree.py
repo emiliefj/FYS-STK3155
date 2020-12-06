@@ -28,23 +28,6 @@ class Node():
         pass
 
 
-    def find_split(self):
-        start_impurity = self.find_impurity()
-        split_threshold, split_feature, split_impurity
-        for each feature in self.input_data:
-            for each unique_value in feature:
-                threshold = value
-                impurity = self.find_impurity()
-                if impurity is better than split_impurity:
-                    split_threshold = threshold
-                    split_impurity = impurity
-                    split_feature = feature
-        self.split_node(split_feature, split_threshold, self.input_data, target)
-
-    def find_impurity(self):
-
-        pass
-
     def split_node(self,split_feature, split_threshold, input_data, target):
         pass
 
@@ -71,8 +54,17 @@ class DecisionTree():
         X   - the input data/features 
         y   - the target values
         '''
-        self.X = X
-        self.y = y
+        #self.X = X
+        #self.y = y
+        self.classes = np.unique(y)
+
+        self.tree = Node()
+        self.tree.depth = 0
+
+        self.build_tree(X, y, self.tree)
+
+
+
 
     def predict(self, X_test):
         '''
@@ -98,10 +90,47 @@ class DecisionTree():
             return None
         pass
 
-    def build_tree(self):
+    def build_tree(self, X, y, node):
+
+        # if max depth not reached
+
+        # find best split for current node
+        left, right, feature, threshold = self.find_split(X,y)
+
+        # create childe nodes
+        left_node, right_node = self.create_child_nodes(node, feature, threshold)
+
+        # continue building tree
+        build_tree(X[left], y[left], left_node)
+        build_tree(X[right], y[right], right_node)
+        
         pass
 
-    def impurity(self):
+    def create_child_nodes(node, feature, threshold):
+        left_node = Node()
+        left_node.depth = node.depth + 1
+        right_node = Node()
+        right_node.depth = node.depth + 1
+        node.left = left_node
+        node.right = right_node
+        node.feature = feature
+        node.threshold = threshold
+        return left_node, right_node
+
+    def find_split(self):
+        start_impurity = self.calculate_impurity()
+        split_threshold, split_feature, split_impurity
+        for each feature in self.input_data:
+            for each unique_value in feature:
+                threshold = value
+                impurity = self.calculate_impurity()
+                if impurity is better than split_impurity:
+                    split_threshold = threshold
+                    split_impurity = impurity
+                    split_feature = feature
+        self.split_node(split_feature, split_threshold, self.input_data, target)
+
+    def calculate_impurity(self):
         '''
         Calculates the impurity using the chosen impurity measure
         '''
