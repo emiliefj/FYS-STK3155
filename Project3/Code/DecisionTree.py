@@ -31,6 +31,7 @@ class DecisionTree():
         #self.X = X
         #self.y = y
         self.classes = np.unique(y)
+        self.n_features = X.shape[1]
 
         self.tree = Node()
         self.tree.depth = 0
@@ -240,6 +241,65 @@ class DecisionTree():
     def entropy(self, y):
         pass
 
+
+def print_tree_structure(tree, feature_names=None, show_weights=False):
+    """
+    Recursively print the given tree
+    """
+    if not tree.tree:
+        # throw error - must run fit
+        return 
+
+    root = tree.tree
+
+    if feature_names:
+        features = feature_names
+    else:
+        features = ["feature_{}".format(i) for i in tree.n_features]
+
+    print_tree_structure.string = ""
+    spacing = 3
+    right_child_fmt = "{} {} <= {}\n"
+    left_child_fmt = "{} {} >  {}\n"
+    truncation_fmt = "{} {}\n"
+    value_fmt = "{}{} weights: {}\n" #value_fmt = "{}{}{}\n"
+
+    def _add_leaf(classification, indent):
+        val = ''
+        val += ' class: ' + str(classification)
+        print_tree_structure.string += value_fmt.format(indent, '', val)
+
+    
+    def recursively_print_tree(node, depth):
+        indent = ("|" + (" " * spacing)) * depth
+        indent = indent[:-spacing] + "-" * spacing
+        probabilities = node.prediction
+        classification = np.argmax(probabilities)
+    
+        info_fmt = ""
+        info_fmt_left = info_fmt
+        info_fmt_right = info_fmt
+        if node.leaf:
+            _add_leaf(classification, indent)
+        else:
+            name = features[node.feature]
+            threshold = node.threshold
+            threshold = "{1:.{0}f}".format(2, threshold)
+            print_tree_structure.string += right_child_fmt.format(indent,
+                                                         name,
+                                                         threshold)
+            print_tree_structure.string += info_fmt_left
+            recursively_print_tree(node.left, depth+1)
+            print_tree_structure.string += left_child_fmt.format(indent,
+                                                        name,
+                                                        threshold)
+            print_tree_structure.string += info_fmt_right
+            recursively_print_tree(node.right, depth+1)
+
+    recursively_print_tree(root, 1)
+    print(print_tree_structure.string)
+
+
 class Node():
     '''
 
@@ -281,7 +341,7 @@ def accuracy(pred, actual):
 
     return correctly_predicted/n
 
-def test_iris():
+def test_iris(plot=False, print_tree=False):
 
     from sklearn.datasets import load_iris
 
@@ -298,9 +358,9 @@ def test_iris():
     # print(display(df))
     # print(X.shape)
 
-    test_dataset(data,name="iris")
+    test_dataset(data,name="iris", plot=plot, print_tree=print_tree, feature_names=data['feature_names'])
 
-def test_dataset(data, random=13, name="iris", plot=False):
+def test_dataset(data, random=13, name="iris", plot=False, print_tree=False, feature_names=None):
     from sklearn.model_selection import train_test_split
 
     X,y,features = data['data'], data['target'],data['feature_names']
@@ -320,15 +380,26 @@ def test_dataset(data, random=13, name="iris", plot=False):
     sk_tree.fit(X_train,y_train)
     y_pred = sk_tree.predict(X_train)
     print()
-    print("scikitlearn's DecisionTreeClassifier:")
+    print("scikit-learn's DecisionTreeClassifier:")
     print("Train accuracy: ", accuracy(y_pred,y_train))
     y_pred = sk_tree.predict(X_test)
     print("Test accuracy: ", accuracy(y_pred,y_test))
 
     if plot:
-        from sklearn import tree
-        tree.plot_tree(sk_tree)
+        from sklearn.tree import plot_tree
+        plot_tree(sk_tree)
         plt.show()
+
+    if print_tree:
+        from sklearn.tree import export_text
+        print()
+        print("The tree using scikitlearn's DecisionTreeClassifier:")
+        print(export_text(sk_tree, feature_names=feature_names))
+
+        print()
+        print("The tree using my own code:")
+        print_tree_structure(tree,feature_names=feature_names)
+        
 
 def test_breast_cancer():
 
@@ -345,9 +416,9 @@ if __name__ == '__main__':
 
     
 
-    test_iris()
+    test_iris(print_tree=True)
     print()
-    test_breast_cancer()
+    #test_breast_cancer()
     
 
 
