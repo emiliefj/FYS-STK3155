@@ -9,14 +9,14 @@ class DecisionTree():
 
 
     '''
-    def __init__(self, impurity_measure='gini', max_depth=5, min_samples_leaf=1, max_leaf_nodes=8):
+    def __init__(self, impurity_measure='gini', max_depth=5, min_samples_leaf=1, max_leaf_nodes=10):
         
         self.measure = impurity_measure.lower()
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
         self.max_leaf_nodes = max_leaf_nodes
 
-        self.n_leaves = 0
+        self.n_leaves = 0 # number of leaves as stopping criteria only sort of works
         self.depth = 0
 
         self.tree = None
@@ -38,7 +38,8 @@ class DecisionTree():
         self.build_tree(X, y, self.tree)
 
 
-        print("Created a decision tree with",self.n_leaves,"leaves, and a depth of", self.depth, " at the deepest.")
+        print("Created a decision tree with",self.n_leaves,
+            "leaves, and a depth of", self.depth, " at the deepest.")
 
 
 
@@ -104,10 +105,19 @@ class DecisionTree():
         probabilities = np.zeros(len(self.classes))
         probabilities[values] = frequency/len(y)
         node.prediction = probabilities
-        print("Making leaf node with prediction: ", node.prediction)
+        # print("Making leaf node with prediction: ", node.prediction)
 
 
     def build_tree(self, X, y, node):
+        '''
+        Recursively builds a decision tree from the input-node.
+        Returns when the stopping criteria are met/it reaches a 
+        leaf node.
+
+        X    - the features/input data of the current node
+        y    - the target/output data of the current node
+        node - the current node to build a tree from
+        '''
 
         if(node.depth>self.depth):
             self.depth = node.depth
@@ -181,15 +191,20 @@ class DecisionTree():
 
             for val in unique_values:
                 threshold = val
-                # if categorical: ==/!=
-                left_index = np.where(X[:,i]<val)
-                right_index = np.where(X[:,i]>=val)
+    
+                # splitting the data using current value as threshold
+                if isinstance(threshold, int) or isinstance(threshold,float):
+                    left_index = np.where(X[:,i]<=val)
+                    right_index = np.where(X[:,i]>val)
+                else: # for string features equality is used
+                    left_index = np.where(X[:,i]==val)
+                    right_index = np.where(X[:,i]!=val)
 
                 impurity_left = self.calculate_impurity(y[left_index])
                 impurity_right = self.calculate_impurity(y[right_index])
                 impurity = impurity_left + impurity_right
                 if(impurity<split_impurity):
-                    #print("!winner! feat: ", i, " split at: ", threshold, "  impurity=",impurity)
+                    # print("!winner! feat: ", i, " split at: ", threshold, "  impurity=",impurity)
 
                     split_threshold = threshold
                     split_impurity = impurity
@@ -266,51 +281,74 @@ def accuracy(pred, actual):
 
     return correctly_predicted/n
 
-def test_run():
-    df = pd.read_csv("go_for_run.csv", sep=",")
-    print(gini_index_dataframe('Humidity',df,'Decision'))
+def test_iris():
 
-    target = df['Decision'].to_numpy()
-    matrix = df.drop(['Decision'], axis=1).to_numpy()
-
-    print()
-    print(df)
-    print()
-
-    print(gini_index_matrix(2, matrix, target))
-
-if __name__ == '__main__':
-    
-    import seaborn as sns
     from sklearn.datasets import load_iris
 
     data = load_iris()
-    X,y,features = data['data'], data['target'],data['feature_names']
+    
 
-    df = pd.DataFrame(X,columns=features)
-    df['target'] = y
-
+    # import seaborn as sns
+    # df = pd.DataFrame(X,columns=features)
+    # df['target'] = y
     # sns.pairplot(df)
     # plt.show()
-    from IPython.display import display 
-    display(list(df.columns.values)) 
+    # from IPython.display import display 
+    # display(list(df.columns.values)) 
     # print(display(df))
     # print(X.shape)
 
-    tree = DecisionTree()
-    #tree.fit(X,y)
-    n = len(y)
-    np.random.seed(13)
-    indexes = np.random.randint(n,size=50) # 10
+    test_dataset(data,name="iris")
 
-    #tree.fit(X[indexes],y[indexes])
-
+def test_dataset(data, random=13, name="iris", plot=False):
     from sklearn.model_selection import train_test_split
-    X_train, X_test, y_train, y_test = train_test_split(X,y, random_state=13)
+
+    X,y,features = data['data'], data['target'],data['feature_names']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random)
+    tree = DecisionTree()
     tree.fit(X_train,y_train)
     y_pred = tree.predict(X_train)
-    print(accuracy(y_pred,y_train))
 
+    print(f"Testing own decision tree code on {name} dataset:")
+    print("Train accuracy: ", accuracy(y_pred,y_train))
+    y_pred = tree.predict(X_test)
+    print("Test accuracy: ", accuracy(y_pred,y_test))
+
+    from sklearn.tree import DecisionTreeClassifier
+    sk_tree = DecisionTreeClassifier(max_depth=3, random_state=random)
+    sk_tree.fit(X_train,y_train)
+    y_pred = sk_tree.predict(X_train)
+    print()
+    print("scikitlearn's DecisionTreeClassifier:")
+    print("Train accuracy: ", accuracy(y_pred,y_train))
+    y_pred = sk_tree.predict(X_test)
+    print("Test accuracy: ", accuracy(y_pred,y_test))
+
+    if plot:
+        from sklearn import tree
+        tree.plot_tree(sk_tree)
+        plt.show()
+
+def test_breast_cancer():
+
+    from sklearn.datasets import load_breast_cancer
+    from sklearn.model_selection import train_test_split
+
+    data = load_breast_cancer()
+    test_dataset(data,name="breast cancer")
+
+
+
+
+if __name__ == '__main__':
+
+    
+
+    test_iris()
+    print()
+    test_breast_cancer()
+    
 
 
 
