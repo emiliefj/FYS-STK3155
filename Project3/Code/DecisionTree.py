@@ -264,9 +264,10 @@ def print_tree_structure(tree, feature_names=None, show_weights=False):
     truncation_fmt = "{} {}\n"
     value_fmt = "{}{} weights: {}\n" #value_fmt = "{}{}{}\n"
 
-    def _add_leaf(classification, indent):
+    def _add_leaf(probabilities, indent):
+        classification = np.argmax(probabilities)
         val = ''
-        val += ' class: ' + str(classification)
+        val += ' class: ' + str(classification) + ',    prediction: ' + str(["%.1f" % prob for prob in probabilities])
         print_tree_structure.string += value_fmt.format(indent, '', val)
 
     
@@ -274,13 +275,13 @@ def print_tree_structure(tree, feature_names=None, show_weights=False):
         indent = ("|" + (" " * spacing)) * depth
         indent = indent[:-spacing] + "-" * spacing
         probabilities = node.prediction
-        classification = np.argmax(probabilities)
+        # classification = np.argmax(probabilities)
     
         info_fmt = ""
         info_fmt_left = info_fmt
         info_fmt_right = info_fmt
         if node.leaf:
-            _add_leaf(classification, indent)
+            _add_leaf(probabilities, indent)
         else:
             name = features[node.feature]
             threshold = node.threshold
@@ -318,8 +319,6 @@ class Node():
         self.depth = None
         self.leaf = None
         
-
-
 
 def accuracy(pred, actual):
     ''' 
