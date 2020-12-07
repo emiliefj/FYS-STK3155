@@ -38,8 +38,7 @@ class DecisionTree():
         self.build_tree(X, y, self.tree)
 
 
-        print("Created a decision tree with",self.n_leaves,"leaves, and a depth of")
-        print(self.depth, " at the deepest.")
+        print("Created a decision tree with",self.n_leaves,"leaves, and a depth of", self.depth, " at the deepest.")
 
 
 
@@ -52,9 +51,28 @@ class DecisionTree():
         X_test  - the test data to make prediciton for
         '''
         if not self.tree:
-            #throw error
+            #throw error, fit first
             return None
-        pass
+
+        n_pred = X_test.shape[0]
+        predictions = np.zeros(n_pred) # For storing predictions
+
+        for i in range(n_pred):
+            
+            predictions[i] = np.argmax(self.make_prediction(self.tree,X_test[i]))
+            # print(X_test[i], predictions[i])
+
+        return predictions
+            
+    def make_prediction(self,node,entry):
+        if(node.leaf): # reached leaf node, found prediction
+            return node.prediction
+        if(entry[node.feature]<node.threshold):
+            return self.make_prediction(node.left, entry)
+        else:
+            return self.make_prediction(node.right, entry)
+
+
 
     def predict_probabilities(self, X_test):
         '''
@@ -68,8 +86,28 @@ class DecisionTree():
             return None
         pass
 
+    def make_leaf(self, node, y):
+        '''
+        make the current node a leaf node, update leaf count and
+        store the class probabilities in this leaf node.
+
+        node    - the node that is found to be a leaf
+        y       - the outputs/targets of the training data
+                  ending in this node
+        '''
+        node.leaf = True
+        self.n_leaves = self.n_leaves+1
+        self.set_prediction(node,y)
+
+    def set_prediction(self,node,y):
+        values, frequency = np.unique(y,  return_counts=True)
+        probabilities = np.zeros(len(self.classes))
+        probabilities[values] = frequency/len(y)
+        node.prediction = probabilities
+        print("Making leaf node with prediction: ", node.prediction)
+
+
     def build_tree(self, X, y, node):
-        print("building a tree, current leaf count: ", self.n_leaves)
 
         if(node.depth>self.depth):
             self.depth = node.depth
@@ -78,7 +116,7 @@ class DecisionTree():
 
         # reached max depth
         if node.depth >= self.max_depth:
-            node.leaf = True
+            self.make_leaf(node,y)
             return
         
         # if X.shape[0] < self.min_samples_split:
@@ -87,14 +125,12 @@ class DecisionTree():
         
         # All entries belong to same class, making leaf
         if np.unique(y).shape[0] == 1:
-            node.leaf = True
-            self.n_leaves = self.n_leaves+1
+            self.make_leaf(node,y)
             return
 
         # reached max number of leaf nodes
         if self.n_leaves>=(self.max_leaf_nodes-1):
-            node.leaf=True
-            self.n_leaves = self.n_leaves+1
+            self.make_leaf(node,y)
             return
 
         # find best split for current node
@@ -102,8 +138,7 @@ class DecisionTree():
 
         if not left:
             # no split improving impurity found, making leaf
-            node.leaf = True
-            self.n_leaves = self.n_leaves+1
+            self.make_leaf(node,y)
             return
 
         # create child nodes
@@ -123,17 +158,19 @@ class DecisionTree():
         node.right = right_node
         node.feature = feature
         node.threshold = threshold
+
         return left_node, right_node
 
     def find_split(self, X, y):
         start_impurity = self.calculate_impurity(y) # ?
 
-        print(pd.DataFrame(X,y))
+        # print(pd.DataFrame(X,y))
         split_impurity = start_impurity #start_impurity
 
         N = X.shape[0]
         N_features = X.shape[1]
 
+        prediction = np.mean(y)
         split_threshold = None
         split_feature = None
         right = None
@@ -141,7 +178,7 @@ class DecisionTree():
 
         for i in range(N_features):
             unique_values, frequency = np.unique(X[:,i], return_counts=True)
-            # print(unique_values)
+
             for val in unique_values:
                 threshold = val
                 # if categorical: ==/!=
@@ -151,11 +188,9 @@ class DecisionTree():
                 impurity_left = self.calculate_impurity(y[left_index])
                 impurity_right = self.calculate_impurity(y[right_index])
                 impurity = impurity_left + impurity_right
-                #print(impurity)
                 if(impurity<split_impurity):
-                    print()
-                    print("!winner! feat: ", i, " split at: ", threshold, "  impurity=",impurity)
-                    print()
+                    #print("!winner! feat: ", i, " split at: ", threshold, "  impurity=",impurity)
+
                     split_threshold = threshold
                     split_impurity = impurity
                     split_feature = i
@@ -187,6 +222,9 @@ class DecisionTree():
         
         return 1-1/(N**2)*np.sum(n_k**2)
 
+    def entropy(self, y):
+        pass
+
 class Node():
     '''
 
@@ -196,93 +234,37 @@ class Node():
     '''
     def __init__(self):#, feature, threshold):
         
-
         self.feature = None
         self.threshold = None
+        self.prediction = None
         self.right = None
         self.left = None
 
         self.depth = None
         self.leaf = None
-        pass
+        
 
 
-    def split_node(self,split_feature, split_threshold, input_data, target):
-        pass
 
-class Tree():
+def accuracy(pred, actual):
+    ''' 
+    A function for measuring the accuracy of classification
+    Returns an accuracy score as the fraction of predictions that are 
+    correct.
+
+    Accuracy = sum(correct predictions)/number of prediction
+
+    pred    - the prediction made by the model
+    actual  - the actual value in the data 
     '''
-    can contain tree statistics?
-    '''
-
-    def __init__(node):
-
-        self.root = node
-        self.max_depth = None
-
-        pass
-
-def gini_index_matrix(feature, input_data, target):
-    '''
-    Calculate the gini index for the data based on feature.
-
-    returns the value for the gini index
-
-    feature     - the column number of the input feature to calculate 
-                  the gini index for
-    input_data  - a matrix with the predictors
-    target      - an array with the target/output values
-    '''
-    unique_values, frequency = np.unique(input_data[:,feature], return_counts=True)
-    N = input_data.shape[0]
-    gini = 0
-
-    for i in range(len(unique_values)):
-        value = unique_values[i]
-        N_k = frequency[i]
-        indexes = np.where(input_data[:,feature]==value)
-        classes, n_k = np.unique(target[indexes],  return_counts=True) 
-        gi = 1-1/(N_k**2)*np.sum(n_k**2)
-        gini  = gini + gi*N_k
-        print(gi)
-
-    return gini/N
+    n = len(pred)
+    correctly_predicted = 0
+    for i in range(n):
+        if(pred[i]==actual[i]):
+            correctly_predicted += 1
 
 
-
-
-
-def gini_index_dataframe(feature, data, target):
-    '''
-    Calculate the gini index for the data based on feature.
-
-    returns the value for the gini index
-
-    feature     - the name of the input feature to calculate the 
-                  gini index for
-    data         - the dataframe with the data
-    target      - the name of the target column in the dataframe
-    '''
-    unique_values = data[feature].value_counts()#.keys().tolist()
-    N = data.shape[0]
-    gini = 0
-
-    for key in unique_values.keys():
-        current_data = data[data[feature] == key]
-        N_k = unique_values[key]
-        n_k = np.array(current_data[target].value_counts().tolist())
-        gi = 1-1/(N_k**2)*np.sum(n_k**2)
-        gini  = gini + gi*N_k
-        print(gi)
-
-    return gini/N
-
-
-def entropy():
-    return 
-
-def p_mk():
-    pass
+    return correctly_predicted/n
 
 def test_run():
     df = pd.read_csv("go_for_run.csv", sep=",")
@@ -327,7 +309,7 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(X,y, random_state=13)
     tree.fit(X_train,y_train)
     y_pred = tree.predict(X_train)
-    # print(pd.dataframe(y_train,y_pred))
+    print(accuracy(y_pred,y_train))
 
 
 
