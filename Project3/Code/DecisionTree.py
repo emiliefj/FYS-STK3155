@@ -195,8 +195,8 @@ class DecisionTree():
     
                 # splitting the data using current value as threshold
                 if isinstance(threshold, int) or isinstance(threshold,float):
-                    left_index = np.where(X[:,i]<=val)
-                    right_index = np.where(X[:,i]>val)
+                    left_index = np.where(X[:,i]<val)
+                    right_index = np.where(X[:,i]>=val)
                 else: # for string features equality is used
                     left_index = np.where(X[:,i]==val)
                     right_index = np.where(X[:,i]!=val)
@@ -298,7 +298,7 @@ def print_tree_structure(tree, feature_names=None, show_weights=False):
             recursively_print_tree(node.right, depth+1)
 
     recursively_print_tree(root, 1)
-    print(print_tree_structure.string)
+    return print_tree_structure.string
 
 
 class Node():
@@ -397,7 +397,7 @@ def test_dataset(data, random=13, name="iris", plot=False, print_tree=False, fea
 
         print()
         print("The tree using my own code:")
-        print_tree_structure(tree,feature_names=feature_names)
+        print(print_tree_structure(tree,feature_names=feature_names))
         
 
 def test_breast_cancer():
