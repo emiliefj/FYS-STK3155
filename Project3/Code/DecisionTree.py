@@ -28,8 +28,6 @@ class DecisionTree():
         X   - the input data/features 
         y   - the target values
         '''
-        #self.X = X
-        #self.y = y
         self.classes = np.unique(y)
         self.n_features = X.shape[1]
 
@@ -57,11 +55,11 @@ class DecisionTree():
             return None
 
         n_pred = X_test.shape[0]
-        predictions = np.zeros(n_pred) # For storing predictions
+        predictions = []#np.zeros(n_pred) # For storing predictions
 
         for i in range(n_pred):
             
-            predictions[i] = np.argmax(self.make_prediction(self.tree,X_test[i]))
+            predictions.append(self.classes[np.argmax(self.make_prediction(self.tree,X_test[i]))])
             # print(X_test[i], predictions[i])
 
         return predictions
@@ -69,11 +67,16 @@ class DecisionTree():
     def make_prediction(self,node,entry):
         if(node.leaf): # reached leaf node, found prediction
             return node.prediction
-        if(entry[node.feature]<node.threshold):
-            return self.make_prediction(node.left, entry)
+        if isinstance(node.threshold, int) or isinstance(node.threshold,float):
+            if(entry[node.feature]<node.threshold):
+                return self.make_prediction(node.left, entry)
+            else:
+                return self.make_prediction(node.right, entry)
         else:
-            return self.make_prediction(node.right, entry)
-
+            if(entry[node.feature]==node.threshold):
+                return self.make_prediction(node.left, entry)
+            else:
+                return self.make_prediction(node.right, entry)
 
 
     def predict_probabilities(self, X_test):
@@ -104,7 +107,8 @@ class DecisionTree():
     def set_prediction(self,node,y):
         values, frequency = np.unique(y,  return_counts=True)
         probabilities = np.zeros(len(self.classes))
-        probabilities[values] = frequency/len(y)
+        indexes = [np.where(self.classes==values[i])[0][0] for i in range(len(values))]
+        probabilities[indexes] = frequency/len(y)
         node.prediction = probabilities
         # print("Making leaf node with prediction: ", node.prediction)
 
@@ -181,7 +185,6 @@ class DecisionTree():
         N = X.shape[0]
         N_features = X.shape[1]
 
-        prediction = np.mean(y)
         split_threshold = None
         split_feature = None
         right = None
@@ -195,8 +198,8 @@ class DecisionTree():
     
                 # splitting the data using current value as threshold
                 if isinstance(threshold, int) or isinstance(threshold,float):
-                    left_index = np.where(X[:,i]<val)
-                    right_index = np.where(X[:,i]>=val)
+                    left_index = np.where(X[:,i]<=val)
+                    right_index = np.where(X[:,i]>val)
                 else: # for string features equality is used
                     left_index = np.where(X[:,i]==val)
                     right_index = np.where(X[:,i]!=val)
@@ -242,7 +245,7 @@ class DecisionTree():
         pass
 
 
-def print_tree_structure(tree, feature_names=None, show_weights=False):
+def print_tree_structure(tree, feature_names=False):
     """
     Recursively print the given tree
     """
@@ -252,10 +255,12 @@ def print_tree_structure(tree, feature_names=None, show_weights=False):
 
     root = tree.tree
 
-    if feature_names:
-        features = feature_names
-    else:
+    #if feature_names:
+    
+    if not feature_names:
         features = ["feature_{}".format(i) for i in tree.n_features]
+    else:
+        features = feature_names
 
     print_tree_structure.string = ""
     spacing = 3
@@ -265,7 +270,7 @@ def print_tree_structure(tree, feature_names=None, show_weights=False):
     value_fmt = "{}{} weights: {}\n" #value_fmt = "{}{}{}\n"
 
     def _add_leaf(probabilities, indent):
-        classification = np.argmax(probabilities)
+        classification = tree.classes[np.argmax(probabilities)]
         val = ''
         val += ' class: ' + str(classification) + ',    prediction: ' + str(["%.1f" % prob for prob in probabilities])
         print_tree_structure.string += value_fmt.format(indent, '', val)
@@ -285,7 +290,14 @@ def print_tree_structure(tree, feature_names=None, show_weights=False):
         else:
             name = features[node.feature]
             threshold = node.threshold
-            threshold = "{1:.{0}f}".format(2, threshold)
+            if isinstance(threshold, int) or isinstance(threshold,float):
+                threshold = "{1:.{0}f}".format(2, threshold)
+                right_child_fmt = "{} {} <= {}\n"
+                left_child_fmt = "{} {} >  {}\n"
+            else:
+                threshold = "{:s}".format(threshold)
+                right_child_fmt = "{} {} == {}\n"
+                left_child_fmt = "{} {} !=  {}\n"
             print_tree_structure.string += right_child_fmt.format(indent,
                                                          name,
                                                          threshold)
@@ -337,8 +349,16 @@ def accuracy(pred, actual):
         if(pred[i]==actual[i]):
             correctly_predicted += 1
 
-
     return correctly_predicted/n
+
+
+def test_breast_cancer():
+
+    from sklearn.datasets import load_breast_cancer
+    from sklearn.model_selection import train_test_split
+
+    data = load_breast_cancer()
+    compare_trees_dataframe(data,name="breast cancer")
 
 def test_iris(plot=False, print_tree=False):
 
@@ -357,22 +377,21 @@ def test_iris(plot=False, print_tree=False):
     # print(display(df))
     # print(X.shape)
 
-    test_dataset(data,name="iris", plot=plot, print_tree=print_tree, feature_names=data['feature_names'])
+    compare_trees_dataframe(data,name="iris", plot=plot, print_tree=print_tree, feature_names=data['feature_names'])
 
-def test_dataset(data, random=13, name="iris", plot=False, print_tree=False, feature_names=None):
+def compare_trees_dataframe(data, random=13, name="iris", plot=False, print_tree=False, feature_names=None):
     from sklearn.model_selection import train_test_split
 
     X,y,features = data['data'], data['target'],data['feature_names']
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random)
-    tree = DecisionTree()
-    tree.fit(X_train,y_train)
-    y_pred = tree.predict(X_train)
+    compare_trees(X_train, y_train, X_test, y_test, random=random, name=name, print_tree=print_tree, feature_names=feature_names)
 
-    print(f"Testing own decision tree code on {name} dataset:")
-    print("Train accuracy: ", accuracy(y_pred,y_train))
-    y_pred = tree.predict(X_test)
-    print("Test accuracy: ", accuracy(y_pred,y_test))
+
+def compare_trees(X_train,y_train,X_test,y_test, max_depth=5, max_leaf_nodes=10, random=13, name="iris", plot=False, print_tree=False, feature_names=None):
+    from sklearn.model_selection import train_test_split
+
+    own_tree = build_and_test_tree(X_train,y_train,X_test,y_test,max_depth=max_depth, max_leaf_nodes=max_leaf_nodes, random=random, name=name, print_tree=print_tree, feature_names=feature_names)
 
     from sklearn.tree import DecisionTreeClassifier
     sk_tree = DecisionTreeClassifier(max_depth=3, random_state=random)
@@ -395,20 +414,22 @@ def test_dataset(data, random=13, name="iris", plot=False, print_tree=False, fea
         print("The tree using scikitlearn's DecisionTreeClassifier:")
         print(export_text(sk_tree, feature_names=feature_names))
 
+        
+def build_and_test_tree(X_train, y_train, X_test, y_test, max_depth=5, max_leaf_nodes=10, random=13, name="iris", print_tree=False, feature_names=None):
+    tree = DecisionTree(max_depth=max_depth, max_leaf_nodes=max_leaf_nodes)
+    tree.fit(X_train,y_train)
+    y_pred = tree.predict(X_train)
+
+    print(f"Testing own decision tree code on {name} dataset:")
+    print("Train accuracy: ", accuracy(y_pred,y_train))
+    y_pred = tree.predict(X_test)
+    print("Test accuracy: ", accuracy(y_pred,y_test))
+
+    if print_tree:
         print()
         print("The tree using my own code:")
         print(print_tree_structure(tree,feature_names=feature_names))
-        
-
-def test_breast_cancer():
-
-    from sklearn.datasets import load_breast_cancer
-    from sklearn.model_selection import train_test_split
-
-    data = load_breast_cancer()
-    test_dataset(data,name="breast cancer")
-
-
+    return tree
 
 
 if __name__ == '__main__':
