@@ -4,9 +4,10 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
 import warnings
-import sys
-sys.path.append('../Code')
-sys.path.append('../Data')
+import os 
+# import sys
+# sys.path.append('../Code')
+# sys.path.append('../Data')
 import DecisionTree as dt
 
 
@@ -63,38 +64,6 @@ def split_train_val_test(X, y, train=0.6, val=0.2, test=0.2, seed=67):
 
 
 
-def variance_threshold(X_train, cutoff=0.8):
-    from sklearn.feature_selection import VarianceThreshold
-
-    selector = VarianceThreshold(threshold=(cutoff*(1-cutoff)))
-    selector.fit_transform(X_train)
-
-    return selector.get_support()
-
-
-def feature_selection(X_train,y_train,plot=False):
-    from sklearn.feature_selection import SelectKBest
-    from sklearn.feature_selection import chi2
-
-    selector = SelectKBest(chi2, k='all')
-    selector.fit(X_train, y_train)
-    scores = selector.scores_
-    # log_scores = scores#-np.log10(scores)
-    if plot:
-        scores /= scores.max()
-        fig, ax = plt.subplots(figsize =(12, 8)) 
-        plt.bar(np.arange(X.shape[-1]), scores, width=.2)
-        plt.title("The relative chi2 scores for each feature")
-        plt.xlabel("feature index")
-        plt.ylabel("relative chi2-score")
-        plt.show()
-    return selector
-
-
-
-def print_array(x,opt='s'):
-    option_str = '{:'+opt+'}'
-    return [option_str.format(i) for i in x]
 
 if __name__ == '__main__':
 
@@ -131,25 +100,37 @@ if __name__ == '__main__':
     # 2. Feature selection #
 
     # Variance threshold
-    cutoff = 0.8
-    chosen_indexes = variance_threshold(X_train, cutoff)
+    # cutoff = 0.8
+    # chosen_indexes = variance_threshold(X_train, cutoff)
     
-    chosen_features = features[chosen_indexes] # +1 as 'class' is removed at 0
-    excluded_features = features[np.where(chosen_indexes==False)]
-    print(f"The {len(chosen_features)} features selected when using a variance threshold of {cutoff} as cutoff are: {print_array(chosen_features)} leaving out the features: {print_array(excluded_features)}")
+    # chosen_features = features[chosen_indexes] # +1 as 'class' is removed at 0
+    # excluded_features = features[np.where(chosen_indexes==False)]
+    # print(f"The {len(chosen_features)} features selected when using a variance threshold of {cutoff} as cutoff are: {print_array(chosen_features)} leaving out the features: {print_array(excluded_features)}")
 
     # Univariate feature selection
     # Issue: I can get 98.52% accuracy using just 'odor'. yet 
     # odor is not selected as an important feature
-    selector = feature_selection(X_train,y_train,plot=False)
-    # print(features[np.argmax(selector.scores_)])
-    # print()
-    # index_best_ordered = np.array([8,17,7,3,10,20,6])
+    # chi2_selector = feature_selection(X_train,y_train,method='chi2',plot=False)
+   
+    # # Get index of the seven highest scores
+    # top_indexes = get_top_scored_features(chi2_selector.scores_, n=7)
+    # selected_features = features[top_indexes]
+    # print(f"The top {len(selected_features)} features according to their chi-squared score are: {print_array(selected_features)}.")
+
+    # mutual_selector = feature_selection(X_train,y_train,method='mutual_info',plot=False)
+    # # Get index of the seven highest scores
+    # top_indexes = get_top_scored_features(mutual_selector.scores_, n=13)
+    # print(top_indexes)
+    # selected_features = features[top_indexes]
+    # print(f"The top {len(selected_features)} features according to their mutual information score are: {print_array(selected_features)}.")
+    #index_best_ordered = np.array([8,17,7,3,10,20,6])
     # print(features[index_best_ordered])
-    # print(selector.scores_[index_best_ordered])
+    # print(chi2_selector.scores_[index_best_ordered])
 
     # print(np.where(X_train[5]!='n'))
     # print(X_train)
+    
+
 
 
 
