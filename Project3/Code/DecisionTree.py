@@ -265,7 +265,7 @@ class DecisionTree():
         pass
 
 
-def print_tree_structure(tree, feature_names=False):
+def print_tree_structure(tree, feature_names=None):
     """
     Recursively print the given tree. 
     Heavily inspired by scikit-learn's export_text()
@@ -281,7 +281,7 @@ def print_tree_structure(tree, feature_names=False):
 
     root = tree.tree
     
-    if not feature_names:
+    if feature_names is None:
         features = ["feature_{}".format(i) for i in tree.n_features]
     else:
         features = feature_names
@@ -431,6 +431,7 @@ def compare_trees(X_train,y_train,X_test,y_test, max_depth=5, max_leaf_nodes=10,
 
         
 def build_and_test_tree(X_train, y_train, X_test, y_test, max_depth=5, max_leaf_nodes=10, random=13, name="iris", print_tree=False, feature_names=None):
+
     tree = DecisionTree(max_depth=max_depth, max_leaf_nodes=max_leaf_nodes)
     tree.fit(X_train,y_train)
     y_pred = tree.predict(X_train)
