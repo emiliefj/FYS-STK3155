@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+import warnings
+
 
 class DecisionTree():
     '''
@@ -51,20 +53,44 @@ class DecisionTree():
         X_test  - the test data to make prediciton for
         '''
         if not self.tree:
-            #throw error, fit first
-            return None
+            raise Exception('Tree has not been fit to data. Run fit() first.')
 
         n_pred = X_test.shape[0]
-        predictions = []#np.zeros(n_pred) # For storing predictions
+        predictions = [] # For storing predictions
 
         for i in range(n_pred):
-            
             predictions.append(self.classes[np.argmax(self.make_prediction(self.tree,X_test[i]))])
-            # print(X_test[i], predictions[i])
 
         return predictions
-            
+
+
+    def predict_probabilities(self, X_test):
+        '''
+        Finds the predicted probabilities for the data in X_test 
+        using the built decision tree.
+
+        X_test  - the test data to make prediciton for
+        '''
+        if not self.tree:
+            raise Exception('Tree has not been fit to data. Run fit() first.')
+
+        n_pred = X_test.shape[0]
+        predictions = [] # For storing predictions
+
+        for i in range(n_pred):
+            predictions.append(self.make_prediction(self.tree,X_test[i]))
+
+        return predictions
+
     def make_prediction(self,node,entry):
+        '''
+        Recursively moves down the tree and finds the list of 
+        predictions/probabilities for each class for the given 
+        entry.
+
+        node    - current node
+        entry   - value of the input value to make prediction for
+        '''
         if(node.leaf): # reached leaf node, found prediction
             return node.prediction
         if isinstance(node.threshold, int) or isinstance(node.threshold,float):
@@ -77,19 +103,6 @@ class DecisionTree():
                 return self.make_prediction(node.left, entry)
             else:
                 return self.make_prediction(node.right, entry)
-
-
-    def predict_probabilities(self, X_test):
-        '''
-        Finds the predicted probabilities for the data in X_test 
-        using the built decision tree.
-
-        X_test  - the test data to make prediciton for
-        '''
-        if not self.tree:
-            #throw error
-            return None
-        pass
 
     def make_leaf(self, node, y):
         '''
@@ -105,12 +118,19 @@ class DecisionTree():
         self.set_prediction(node,y)
 
     def set_prediction(self,node,y):
+        '''
+        Sets the prediction for the node, meaning a list of
+        predicted probabilitie for each possible class.
+
+        node    - the (leaf) node to stor prediction for
+        y       - the outputs/targets of the training data
+                  ending in this node
+        '''
         values, frequency = np.unique(y,  return_counts=True)
         probabilities = np.zeros(len(self.classes))
         indexes = [np.where(self.classes==values[i])[0][0] for i in range(len(values))]
         probabilities[indexes] = frequency/len(y)
         node.prediction = probabilities
-        # print("Making leaf node with prediction: ", node.prediction)
 
 
     def build_tree(self, X, y, node):
@@ -247,15 +267,19 @@ class DecisionTree():
 
 def print_tree_structure(tree, feature_names=False):
     """
-    Recursively print the given tree
+    Recursively print the given tree. 
+    Heavily inspired by scikit-learn's export_text()
+
+    tree            - the DecisionTree object to print tree for
+    feature_names   - The names of the features in the tree. If
+                      not given the featured will be numbered
+                      as feature_i for the ith feature.
     """
     if not tree.tree:
-        # throw error - must run fit
+        raise Exception('Tree has not been fit to data. Run fit() first.')
         return 
 
     root = tree.tree
-
-    #if feature_names:
     
     if not feature_names:
         features = ["feature_{}".format(i) for i in tree.n_features]
@@ -264,8 +288,6 @@ def print_tree_structure(tree, feature_names=False):
 
     print_tree_structure.string = ""
     spacing = 3
-    right_child_fmt = "{} {} <= {}\n"
-    left_child_fmt = "{} {} >  {}\n"
     truncation_fmt = "{} {}\n"
     value_fmt = "{}{} weights: {}\n" #value_fmt = "{}{}{}\n"
 
@@ -280,7 +302,6 @@ def print_tree_structure(tree, feature_names=False):
         indent = ("|" + (" " * spacing)) * depth
         indent = indent[:-spacing] + "-" * spacing
         probabilities = node.prediction
-        # classification = np.argmax(probabilities)
     
         info_fmt = ""
         info_fmt_left = info_fmt
@@ -316,11 +337,11 @@ def print_tree_structure(tree, feature_names=False):
 class Node():
     '''
 
-    feature     - The feature the node makes its deciosion based on
-    threshold   - The threshold separating the left and right branch of the node
-
+    feature     - The feature the node makes its decision based on
+    threshold   - The threshold separating the left and right branch
+                  of the node
     '''
-    def __init__(self):#, feature, threshold):
+    def __init__(self):
         
         self.feature = None
         self.threshold = None
@@ -352,6 +373,12 @@ def accuracy(pred, actual):
     return correctly_predicted/n
 
 
+#####################################################################
+############# Tests and runs for specific datasets ##################
+#####################################################################
+
+
+
 def test_breast_cancer():
 
     from sklearn.datasets import load_breast_cancer
@@ -365,18 +392,6 @@ def test_iris(plot=False, print_tree=False):
     from sklearn.datasets import load_iris
 
     data = load_iris()
-    
-
-    # import seaborn as sns
-    # df = pd.DataFrame(X,columns=features)
-    # df['target'] = y
-    # sns.pairplot(df)
-    # plt.show()
-    # from IPython.display import display 
-    # display(list(df.columns.values)) 
-    # print(display(df))
-    # print(X.shape)
-
     compare_trees_dataframe(data,name="iris", plot=plot, print_tree=print_tree, feature_names=data['feature_names'])
 
 def compare_trees_dataframe(data, random=13, name="iris", plot=False, print_tree=False, feature_names=None):
@@ -438,7 +453,7 @@ if __name__ == '__main__':
 
     test_iris(print_tree=True)
     print()
-    #test_breast_cancer()
+    test_breast_cancer()
     
 
 
