@@ -1,0 +1,19 @@
+Created a decision tree with 5 leaves, and a depth of 4  at the deepest.
+Testing own decision tree code on mushroom dataset:
+Train accuracy:  0.8943156166632464
+Test accuracy:  0.9076923076923077
+
+The tree using my own code:
+|--- gill-color == 0
+|   |--- weights:  class: 1,    prediction: ['0.0', '1.0']
+|--- gill-color !=  0
+|   |--- ring-type == 2
+|   |   |--- weights:  class: 1,    prediction: ['0.0', '1.0']
+|   |--- ring-type !=  2
+|   |   |--- ring-type == 3
+|   |   |   |--- weights:  class: 1,    prediction: ['0.0', '1.0']
+|   |   |--- ring-type !=  3
+|   |   |   |--- gill-color == 8
+|   |   |   |   |--- weights:  class: 1,    prediction: ['0.0', '1.0']
+|   |   |   |--- gill-color !=  8
+|   |   |   |   |--- weights:  class: 0,    prediction: ['0.8', '0.2']

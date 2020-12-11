@@ -1,0 +1,28 @@
+Created a decision tree with 8 leaves, and a depth of 5  at the deepest.
+Testing own decision tree code on mushroom dataset:
+Train accuracy:  0.9983583008413708
+Test accuracy:  0.9987692307692307
+
+The tree using my own code:
+|--- odor == 5
+|   |--- spore-print-color == 5
+|   |   |--- weights:  class: 1,    prediction: ['0.0', '1.0']
+|   |--- spore-print-color !=  5
+|   |   |--- cap-color == 9
+|   |   |   |--- weights:  class: 1,    prediction: ['0.0', '1.0']
+|   |   |--- cap-color !=  9
+|   |   |   |--- stalk-color-below-ring == 8
+|   |   |   |   |--- weights:  class: 1,    prediction: ['0.0', '1.0']
+|   |   |   |--- stalk-color-below-ring !=  8
+|   |   |   |   |--- cap-surface == 1
+|   |   |   |   |   |--- weights:  class: 1,    prediction: ['0.0', '1.0']
+|   |   |   |   |--- cap-surface !=  1
+|   |   |   |   |   |--- weights:  class: 0,    prediction: ['1.0', '0.0']
+|--- odor !=  5
+|   |--- odor == 3
+|   |   |--- weights:  class: 0,    prediction: ['1.0', '0.0']
+|   |--- odor !=  3
+|   |   |--- odor == 0
+|   |   |   |--- weights:  class: 0,    prediction: ['1.0', '0.0']
+|   |   |--- odor !=  0
+|   |   |   |--- weights:  class: 1,    prediction: ['0.0', '1.0']

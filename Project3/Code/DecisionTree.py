@@ -39,8 +39,7 @@ class DecisionTree():
         self.build_tree(X, y, self.tree)
 
 
-        print("Created a decision tree with",self.n_leaves,
-            "leaves, and a depth of", self.depth, " at the deepest.")
+        print("\n* Created a decision tree with",self.n_leaves,"leaves, and a depth of", self.depth, "at the deepest.* ")
 
 
 
@@ -316,7 +315,7 @@ def print_tree_structure(tree, feature_names=None):
                 right_child_fmt = "{} {} <= {}\n"
                 left_child_fmt = "{} {} >  {}\n"
             else:
-                threshold = "{:s}".format(threshold)
+                threshold = "{:d}".format(threshold)
                 right_child_fmt = "{} {} == {}\n"
                 left_child_fmt = "{} {} !=  {}\n"
             print_tree_structure.string += right_child_fmt.format(indent,
@@ -406,14 +405,17 @@ def compare_trees_dataframe(data, random=13, name="iris", plot=False, print_tree
 def compare_trees(X_train,y_train,X_test,y_test, max_depth=5, max_leaf_nodes=10, random=13, name="iris", plot=False, print_tree=False, feature_names=None):
     from sklearn.model_selection import train_test_split
 
-    own_tree = build_and_test_tree(X_train,y_train,X_test,y_test,max_depth=max_depth, max_leaf_nodes=max_leaf_nodes, random=random, name=name, print_tree=print_tree, feature_names=feature_names)
+    build_and_test_tree(X_train,y_train,X_test,y_test,max_depth=max_depth, max_leaf_nodes=max_leaf_nodes, random=random, name=name, print_tree=print_tree, feature_names=feature_names)
+    test_scikit_tree(X_train,y_train,X_test,y_test,max_depth=max_depth, random=random, name=name, plot=plot, print_tree=print_tree, feature_names=feature_names)
 
+
+def test_scikit_tree(X_train, y_train, X_test, y_test, max_depth=5, random=13, name="iris", plot=False, print_tree=False, feature_names=None):
     from sklearn.tree import DecisionTreeClassifier
-    sk_tree = DecisionTreeClassifier(max_depth=3, random_state=random)
+    sk_tree = DecisionTreeClassifier(max_depth=max_depth, random_state=random)
     sk_tree.fit(X_train,y_train)
     y_pred = sk_tree.predict(X_train)
     print()
-    print("scikit-learn's DecisionTreeClassifier:")
+    print(f"\nTesting scikit-learn's DecisionTreeClassifier on {name} dataset:")
     print("Train accuracy: ", accuracy(y_pred,y_train))
     y_pred = sk_tree.predict(X_test)
     print("Test accuracy: ", accuracy(y_pred,y_test))
@@ -427,7 +429,7 @@ def compare_trees(X_train,y_train,X_test,y_test, max_depth=5, max_leaf_nodes=10,
         from sklearn.tree import export_text
         print()
         print("The tree using scikitlearn's DecisionTreeClassifier:")
-        print(export_text(sk_tree, feature_names=feature_names))
+        print(export_text(sk_tree, feature_names=list(feature_names)))
 
         
 def build_and_test_tree(X_train, y_train, X_test, y_test, max_depth=5, max_leaf_nodes=10, random=13, name="iris", print_tree=False, feature_names=None):
@@ -436,7 +438,7 @@ def build_and_test_tree(X_train, y_train, X_test, y_test, max_depth=5, max_leaf_
     tree.fit(X_train,y_train)
     y_pred = tree.predict(X_train)
 
-    print(f"Testing own decision tree code on {name} dataset:")
+    print(f"\nTesting own decision tree code on {name} dataset:")
     print("Train accuracy: ", accuracy(y_pred,y_train))
     y_pred = tree.predict(X_test)
     print("Test accuracy: ", accuracy(y_pred,y_test))
