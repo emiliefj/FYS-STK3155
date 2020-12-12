@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
 import warnings
-import os 
+# import os 
 # import sys
 # sys.path.append('../Code')
 # sys.path.append('../Data')
@@ -61,78 +61,4 @@ def split_train_val_test(X, y, train=0.6, val=0.2, test=0.2, seed=67):
     X_val, X_test, y_val, y_test = train_test_split(X_test_and_val, y_test_and_val, test_size=test_frac, train_size=val_frac, random_state=seed*3, stratify=y_test_and_val)
 
     return X_train, X_val, X_test, y_train, y_val, y_test
-
-
-
-
-if __name__ == '__main__':
-
-    # 1. Pre-process data #
-    #print("We begin by reading in data, and splitting into train, validation, and test subsets.")
-
-    df = read_data()
-
-    # odor = df['odor']
-    # indexes = np.array(np.where((odor!='n') & (odor!= 'a') & (odor!='l')))
-    # y = df['class']
-    # unique, frequency = np.unique(y, return_counts=True) 
-    # print(unique,"  ", frequency)
-
-    # indexes = indexes.reshape((-1,))
-    # result = y[indexes]
-
-    # unique, frequency = np.unique(result,return_counts=True) 
-    # print(unique,"  ", frequency)
-
-
-    # 'veil-type' has zero variance
-    df.drop(columns=['veil-type'], axis=1, inplace=True)
-    features = np.array(df.columns[1:])
-    df = make_df_numerical(df)
-
-
-    y = df['class']
-    X = df.drop(['class'], axis=1)
-
-    X_train, X_val, X_test, y_train, y_val, y_test = split_train_val_test(X,y,0.6,0.2,0.2)
-
-
-    # 2. Feature selection #
-
-    # Variance threshold
-    # cutoff = 0.8
-    # chosen_indexes = variance_threshold(X_train, cutoff)
-    
-    # chosen_features = features[chosen_indexes] # +1 as 'class' is removed at 0
-    # excluded_features = features[np.where(chosen_indexes==False)]
-    # print(f"The {len(chosen_features)} features selected when using a variance threshold of {cutoff} as cutoff are: {print_array(chosen_features)} leaving out the features: {print_array(excluded_features)}")
-
-    # Univariate feature selection
-    # Issue: I can get 98.52% accuracy using just 'odor'. yet 
-    # odor is not selected as an important feature
-    # chi2_selector = feature_selection(X_train,y_train,method='chi2',plot=False)
-   
-    # # Get index of the seven highest scores
-    # top_indexes = get_top_scored_features(chi2_selector.scores_, n=7)
-    # selected_features = features[top_indexes]
-    # print(f"The top {len(selected_features)} features according to their chi-squared score are: {print_array(selected_features)}.")
-
-    # mutual_selector = feature_selection(X_train,y_train,method='mutual_info',plot=False)
-    # # Get index of the seven highest scores
-    # top_indexes = get_top_scored_features(mutual_selector.scores_, n=13)
-    # print(top_indexes)
-    # selected_features = features[top_indexes]
-    # print(f"The top {len(selected_features)} features according to their mutual information score are: {print_array(selected_features)}.")
-    #index_best_ordered = np.array([8,17,7,3,10,20,6])
-    # print(features[index_best_ordered])
-    # print(chi2_selector.scores_[index_best_ordered])
-
-    # print(np.where(X_train[5]!='n'))
-    # print(X_train)
-    
-
-
-
-
-     
 
