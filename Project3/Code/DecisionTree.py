@@ -11,8 +11,8 @@ class DecisionTree():
 
 
     '''
-    def __init__(self, impurity_measure='gini', max_depth=5, min_samples_leaf=1, max_leaf_nodes=10):
-        
+    def __init__(self, impurity_measure='gini', max_depth=5, min_samples_leaf=1, max_leaf_nodes=10,seed=71):
+        np.random.seed(seed)
         self.measure = impurity_measure.lower()
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
@@ -38,10 +38,7 @@ class DecisionTree():
 
         self.build_tree(X, y, self.tree)
 
-
         print("\n* Created a decision tree with",self.n_leaves,"leaves, and a depth of", self.depth, "at the deepest.* ")
-
-
 
 
     def predict(self, X_test):
@@ -180,7 +177,9 @@ class DecisionTree():
 
         # continue building tree
         self.build_tree(X[left], y[left], left_node)
-        self.build_tree(X[right], y[right], right_node)        
+        self.build_tree(X[right], y[right], right_node)
+        
+                
 
 
     def create_child_nodes(self, node, feature, threshold):
@@ -195,22 +194,34 @@ class DecisionTree():
 
         return left_node, right_node
 
+    def impurity_weight(self, z):
+        if z==0:
+            return 0
+        else:
+            return 1./z
+
     def find_split(self, X, y):
+        # print(f"finding split for \n{X}.")
         start_impurity = self.calculate_impurity(y) # ?
+        # print(f"found start_impurity {start_impurity}.")
 
         # print(pd.DataFrame(X,y))
         split_impurity = start_impurity #start_impurity
-
-        N = X.shape[0]
-        N_features = X.shape[1]
 
         split_threshold = None
         split_feature = None
         right = None
         left = None
+        # print(f"start_impurity: {start_impurity}")
 
-        for i in range(N_features):
+        N = X.shape[0]
+        N_features = X.shape[1]
+        feature_loop = np.arange(N_features)
+        np.random.shuffle(feature_loop)
+
+        for i in feature_loop:
             unique_values, frequency = np.unique(X[:,i], return_counts=True)
+            # print(f"i: {i} unique_values: {unique_values} frequency: {frequency}.")
 
             for val in unique_values:
                 threshold = val
@@ -222,10 +233,11 @@ class DecisionTree():
                 else: # for string features equality is used
                     left_index = np.where(X[:,i]==val)
                     right_index = np.where(X[:,i]!=val)
-
-                impurity_left = self.calculate_impurity(y[left_index])
-                impurity_right = self.calculate_impurity(y[right_index])
+                impurity_left = self.calculate_impurity(y[left_index])#*self.impurity_weight(len(left_index[0]))
+                impurity_right = self.calculate_impurity(y[right_index])#*self.impurity_weight(len(right_index[0]))
                 impurity = impurity_left + impurity_right
+                # print(f"total impurity: {impurity}.")
+                # print("feat: ", i, " split at: ", threshold, " gives impurity =",impurity)
                 if(impurity<split_impurity):
                     # print("!winner! feat: ", i, " split at: ", threshold, "  impurity=",impurity)
 
@@ -281,14 +293,14 @@ def print_tree_structure(tree, feature_names=None):
     root = tree.tree
     
     if feature_names is None:
-        features = ["feature_{}".format(i) for i in tree.n_features]
+        features = ["feature_{}".format(i) for i in range(tree.n_features)]
     else:
         features = feature_names
 
     print_tree_structure.string = ""
     spacing = 3
     truncation_fmt = "{} {}\n"
-    value_fmt = "{}{} weights: {}\n" #value_fmt = "{}{}{}\n"
+    value_fmt = "{}{}{}\n" #value_fmt = "{}{}{}\n"
 
     def _add_leaf(probabilities, indent):
         classification = tree.classes[np.argmax(probabilities)]
@@ -378,20 +390,21 @@ def accuracy(pred, actual):
 
 
 
-def test_breast_cancer():
+def test_breast_cancer(plot=False, print_tree=False, random=13):
 
     from sklearn.datasets import load_breast_cancer
     from sklearn.model_selection import train_test_split
 
     data = load_breast_cancer()
-    compare_trees_dataframe(data,name="breast cancer")
+    compare_trees_dataframe(data,random=random,name="breast cancer",plot=plot, print_tree=print_tree, feature_names=data['feature_names'])
 
-def test_iris(plot=False, print_tree=False):
+def test_iris(plot=False, print_tree=False, random=13):
 
     from sklearn.datasets import load_iris
 
     data = load_iris()
-    compare_trees_dataframe(data,name="iris", plot=plot, print_tree=print_tree, feature_names=data['feature_names'])
+    # print(data['feature_names'])
+    compare_trees_dataframe(data,random=random,name="iris", plot=plot, print_tree=print_tree, feature_names=data['feature_names'])
 
 def compare_trees_dataframe(data, random=13, name="iris", plot=False, print_tree=False, feature_names=None):
     from sklearn.model_selection import train_test_split
@@ -399,14 +412,14 @@ def compare_trees_dataframe(data, random=13, name="iris", plot=False, print_tree
     X,y,features = data['data'], data['target'],data['feature_names']
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random)
-    compare_trees(X_train, y_train, X_test, y_test, random=random, name=name, print_tree=print_tree, feature_names=feature_names)
+    compare_trees(X_train, y_train, X_test, y_test, random=random, name=name, plot=plot,print_tree=print_tree, feature_names=feature_names)
 
 
 def compare_trees(X_train,y_train,X_test,y_test, max_depth=5, max_leaf_nodes=10, random=13, name="iris", plot=False, print_tree=False, feature_names=None):
     from sklearn.model_selection import train_test_split
 
     build_and_test_tree(X_train,y_train,X_test,y_test,max_depth=max_depth, max_leaf_nodes=max_leaf_nodes, random=random, name=name, print_tree=print_tree, feature_names=feature_names)
-    test_scikit_tree(X_train,y_train,X_test,y_test,max_depth=max_depth, random=random, name=name, plot=plot, print_tree=print_tree, feature_names=feature_names)
+    test_scikit_tree(X_train,y_train,X_test,y_test,max_depth=max_depth, random=3, name=name, plot=plot, print_tree=print_tree, feature_names=feature_names)
 
 
 def test_scikit_tree(X_train, y_train, X_test, y_test, max_depth=5, random=13, name="iris", plot=False, print_tree=False, feature_names=None):
@@ -434,7 +447,7 @@ def test_scikit_tree(X_train, y_train, X_test, y_test, max_depth=5, random=13, n
         
 def build_and_test_tree(X_train, y_train, X_test, y_test, max_depth=5, max_leaf_nodes=10, random=13, name="iris", print_tree=False, feature_names=None):
 
-    tree = DecisionTree(max_depth=max_depth, max_leaf_nodes=max_leaf_nodes)
+    tree = DecisionTree(max_depth=max_depth, max_leaf_nodes=max_leaf_nodes,seed=random)
     tree.fit(X_train,y_train)
     y_pred = tree.predict(X_train)
 
@@ -454,9 +467,9 @@ if __name__ == '__main__':
 
     
 
-    test_iris(print_tree=True)
-    print()
-    test_breast_cancer()
+    test_iris(plot=False,print_tree=True,random=43)
+    # print()
+    # test_breast_cancer(print_tree=True)
     
 
 
