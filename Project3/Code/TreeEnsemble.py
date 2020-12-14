@@ -48,7 +48,7 @@ class Bagging(TreeEnsemble):
         N = len(y) 
         n = self.n_samples
         if isinstance(n,float):
-            n = int(len(y)*n)
+            n = int(N*n)
 
         for i in range(self.N_trees):
             # draw n data points 
@@ -126,6 +126,87 @@ class RandomForest(Bagging):
             pred_sum = pred_sum+self.trees[i].predict_proba(X_)
         return  self.classes[np.argmax(pred_sum,axis=1)]
 
+class AdaptiveBoosting(Bagging):
+    '''
+    Algorithm:
+    Step 1: assign equal weight to each observation
+    weights = np.ones()*1./X.shape[0]
+    (repeat 2-4 for all learners)
+    Step 2: fit learner to a random sample (with replacement) of the 
+    weighted observations
+    Step 3: calculate error by summing up the weight of those misclassified
+    error = sum(weights of misclassified observation)/sum(weights)
+    Step 4: update weights of the misclassified entries using the quantity
+    alpha=log(1−error)/error: weight_i = weight_i*exp(alpha) for incorrectly
+    classified entries, and weight_i = weight_i*exp(-alpha) for correctly
+    classified entries.
+    '''
+    def fit(self, X, y):
+        '''
+        Fits each of the N_trees to a subset of the input data X and
+        y. The data to fit to is a subset of size n_samples drawn 
+        randomly from X and y for each tree. The trees are stored 
+        in a list for future predictions.
+        After each fitting, the result is evaluated and input that is 
+        wrongly classified gets increased weight, meaning these are
+        more likely to be used for fitting in subsequent trees.
+        I am using scikit-learn's DecisionTreeClassifier in place of 
+        my own DecisionTree as the latter is not optimized for speed.
+
+        X   - the features of the training data
+        y   - the target of the training data
+        '''
+        self.classes = np.unique(y)
+        self.trees = []
+        N = len(y) 
+        n = self.n_samples
+        if isinstance(n,float):
+            n = int(N*n)
+
+        # Initialize weights:
+        w = (np.ones(N)*1./N).reshape(-1,1)
+
+        for i in range(self.N_trees):
+            # draw random sample of input
+            # probability of index being selected is proportional to weight at that index
+            # batch = np.random.randint(N,size=n)
+            batch = np.random.choice(N,size=n,p=w.flatten())
+            w_ = w[batch]
+            X_ = X[batch]
+            y_ = y[batch]
+
+            # Using scikit-learn's decision tree for improved speed
+            tree = DecisionTreeClassifier(criterion=self.measure, max_depth=self.max_depth, min_samples_leaf=self.min_samples_leaf, random_state=self.seed, max_leaf_nodes=self.max_leaf_nodes)
+            tree.fit(X_,y_)
+            self.trees.append(tree)
+
+
+            y_pred = tree.predict(X_)
+            wrong = np.where(y_pred==y_, 0, 1).reshape(-1,1)            
+
+            # update weights:
+            # calculate error by summing up the weight of those misclassified
+            error = np.sum(w_*wrong)
+            if error==0:
+                  # if error is 0, we don't want to change the weights
+                alpha = 0
+            else:
+                alpha = np.log((1.-error)/error)
+
+            wrong[wrong == 0] = -1
+            w[batch] = w_*np.exp(alpha*wrong)
+
+            # re-normalizing to sum to one
+            w = w/np.sum(w) 
+
+
+            # Step 3: calculate error by summing up the weight of those misclassified
+            # error = sum(weights of misclassified observation)/sum(weights)
+            # Step 4: update weights of the misclassified entries using the quantity
+            # alpha=log(1−error)/error: weight_i = weight_i*exp(alpha) for incorrectly
+            # classified entries, and weight_i = weight_i*exp(-alpha) for correctly
+            # classified entries.
+
 
 if __name__ == '__main__':
 
@@ -140,15 +221,16 @@ if __name__ == '__main__':
 
     # Load and split data
     data = load_breast_cancer()
+
     X,y,features = data['data'], data['target'],data['feature_names']
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=99)
 
     n_trees = 100
     n_samples = 1.0
     n_features = 5
-    max_depth = 3
+    max_depth = 1
     min_samples_leaf=1
-    max_leaf_nodes=10
+    max_leaf_nodes=2
     random = 99
 
     # Own bagging code
@@ -178,6 +260,11 @@ if __name__ == '__main__':
     y_pred = sk_tree.predict(X_test)
     print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
+    # from sklearn.tree import export_text
+    # print()
+    # print("The tree using scikitlearn's DecisionTreeClassifier:")
+    # print(export_text(sk_tree, feature_names=list(features)))
+
     # scikit-learn's Bagging module
     tree = BaggingClassifier(sk_tree, n_estimators=n_trees,max_samples=n_samples, bootstrap=True, n_jobs=-1, random_state=random)
     tree.fit(X_train, y_train)
@@ -196,6 +283,14 @@ if __name__ == '__main__':
     y_pred = tree.predict(X_test)
     print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
+    # Own Adaptive Boosting code
+    ab = AdaptiveBoosting(n_trees,n_samples=n_samples, max_depth=max_depth, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes,seed=random)
+    ab.fit(X_train,y_train)
+    y_pred = ab.predict(X_train)
+    print(f"\nTesting adaptive boosting code on breast cancer dataset:")
+    print("Train accuracy: ", dt.accuracy(y_pred,y_train))
+    y_pred = ab.predict(X_test)
+    print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
 
 
