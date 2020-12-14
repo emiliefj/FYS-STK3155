@@ -1,0 +1,47 @@
+The 13 features selected when using a variance threshold of 0.8 as cutoff are: ['baseline value', 'abnormal_short_term_variability', 'mean_value_of_short_term_variability', 'percentage_of_time_with_abnormal_long_term_variability', 'mean_value_of_long_term_variability', 'histogram_width', 'histogram_min', 'histogram_max', 'histogram_number_of_peaks', 'histogram_number_of_zeroes', 'histogram_mode', 'histogram_variance', 'histogram_tendency'] leaving out the features: ['accelerations', 'fetal_movement', 'uterine_contractions', 'light_decelerations', 'severe_decelerations', 'prolongued_decelerations']
+
+The top 15 features according to their ANOVA F-value score are: ['prolongued_decelerations', 'abnormal_short_term_variability', 'percentage_of_time_with_abnormal_long_term_variability', 'histogram_mode', 'accelerations', 'baseline value', 'histogram_variance', 'mean_value_of_short_term_variability', 'uterine_contractions', 'mean_value_of_long_term_variability', 'histogram_min', 'light_decelerations', 'histogram_width', 'histogram_tendency', 'severe_decelerations'].
+
+The top 17 features according to their mutual information score are: ['mean_value_of_short_term_variability', 'abnormal_short_term_variability', 'percentage_of_time_with_abnormal_long_term_variability', 'histogram_variance', 'histogram_mode', 'accelerations', 'histogram_width', 'baseline value', 'histogram_min', 'prolongued_decelerations', 'mean_value_of_long_term_variability', 'uterine_contractions', 'histogram_max', 'fetal_movement', 'histogram_number_of_peaks', 'light_decelerations', 'histogram_number_of_zeroes'].
+
+
+Comparing own code and scikit-learn on full fetal health dataset:
+
+* Created a decision tree with 6 leaves, and a depth of 5 at the deepest.* 
+
+Testing own decision tree code on fetal health dataset:
+Train accuracy:  0.8211764705882353
+Test accuracy:  0.8141176470588235
+
+
+Testing scikit-learn's DecisionTreeClassifier on fetal health dataset:
+Train accuracy:  0.9458823529411765
+Test accuracy:  0.92
+
+Decision tree with features selected using variance threshold:
+
+* Created a decision tree with 6 leaves, and a depth of 5 at the deepest.* 
+
+Testing own decision tree code on fetal health dataset:
+Train accuracy:  0.8094117647058824
+Test accuracy:  0.8070588235294117
+
+Decision tree with features selected using f_classif:
+
+* Created a decision tree with 6 leaves, and a depth of 5 at the deepest.* 
+
+Testing own decision tree code on fetal health dataset:
+Train accuracy:  0.8211764705882353
+Test accuracy:  0.8235294117647058
+
+Decision tree with features selected using mutual information:
+
+* Created a decision tree with 6 leaves, and a depth of 5 at the deepest.* 
+
+Testing own decision tree code on fetal health dataset:
+Train accuracy:  0.8211764705882353
+Test accuracy:  0.8235294117647058
+
+Accuracy on fetal health dataset using logistic regression with a learning rate of 5e-05, 100 epochs and a batchsize of 50 is: 
+Training: 0.8415686274509804
+Validation: 0.8494117647058823

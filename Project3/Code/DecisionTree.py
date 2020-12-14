@@ -208,7 +208,6 @@ class DecisionTree():
         # print(f"found start_impurity {start_impurity}.")
 
         # print(pd.DataFrame(X,y))
-        start_impurity = 1
         split_impurity = start_impurity #start_impurity
 
         split_threshold = None

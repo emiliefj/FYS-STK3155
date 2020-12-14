@@ -97,7 +97,7 @@ class LogisticRegression():
         index corresponding to the number-value.
         '''
         vector = np.zeros((k,))
-        vector[i] = 1.0
+        vector[int(i)] = 1.0
         return vector
 
 def accuracy(pred, actual):
@@ -122,7 +122,7 @@ def accuracy(pred, actual):
 
 def find_learning_rate(X_train, y_train, X_test, y_test, k=2, seed=91, plot=False):
     from sklearn.linear_model import SGDClassifier
-    lrs = np.array([0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1.0,2.5,5.0]) # 0.00001,0.00005,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1.0,2.0
+    lrs = np.array([0.00001,0.00005,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1.0,2.5,5.0]) # 0.00001,0.00005,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1.0,2.0
     accuracy_logreg = np.zeros((len(lrs),2))
     for i in range(len(lrs)):
         # scikit-learn
@@ -151,7 +151,6 @@ def find_learning_rate(X_train, y_train, X_test, y_test, k=2, seed=91, plot=Fals
         plt.title('Accuracy for Logistic Multinomial Regression')
         plt.legend()
         plt.show()
-
 
     return lrs[np.argmax(accuracy_logreg[:,1])]
 

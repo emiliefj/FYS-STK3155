@@ -11,7 +11,7 @@ import warnings
 import DecisionTree as dt
 
 
-def read_data(file_location='../Data/UCI MLR/agaricus-lepiota.data.csv', 
+def read_data(file_location='../Data/Mushroom/UCI MLR/agaricus-lepiota.data.csv', 
               names=['class','cap-shape','cap-surface','cap-color',
                  'bruises','odor','gill-attachment','gill-spacing',
                  'gill-size','gill-color','stalk-shape','stalk-root',
