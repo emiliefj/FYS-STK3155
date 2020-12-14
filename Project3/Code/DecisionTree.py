@@ -11,12 +11,13 @@ class DecisionTree():
 
 
     '''
-    def __init__(self, impurity_measure='gini', max_depth=5, min_samples_leaf=1, max_leaf_nodes=10,seed=71):
+    def __init__(self, impurity_measure='gini', max_depth=5, min_samples_leaf=1, max_leaf_nodes=10,seed=71,print_success=True):
         np.random.seed(seed)
         self.measure = impurity_measure.lower()
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
         self.max_leaf_nodes = max_leaf_nodes
+        self.print=print_success
 
         self.n_leaves = 0 # number of leaves as stopping criteria only sort of works
         self.depth = 0
@@ -38,7 +39,8 @@ class DecisionTree():
 
         self.build_tree(X, y, self.tree)
 
-        print("\n* Created a decision tree with",self.n_leaves,"leaves, and a depth of", self.depth, "at the deepest.* ")
+        if self.print:
+            print("\n* Created a decision tree with",self.n_leaves,"leaves, and a depth of", self.depth, "at the deepest.* ")
 
 
     def predict(self, X_test):
@@ -206,6 +208,7 @@ class DecisionTree():
         # print(f"found start_impurity {start_impurity}.")
 
         # print(pd.DataFrame(X,y))
+        start_impurity = 1
         split_impurity = start_impurity #start_impurity
 
         split_threshold = None
@@ -233,10 +236,10 @@ class DecisionTree():
                 else: # for string features equality is used
                     left_index = np.where(X[:,i]==val)
                     right_index = np.where(X[:,i]!=val)
-                impurity_left = self.calculate_impurity(y[left_index])#*self.impurity_weight(len(left_index[0]))
-                impurity_right = self.calculate_impurity(y[right_index])#*self.impurity_weight(len(right_index[0]))
+                impurity_left = self.calculate_impurity(y[left_index])*len(left_index[0])/N#self.impurity_weight(len(left_index[0]))
+                impurity_right = self.calculate_impurity(y[right_index])*len(right_index[0])/N#self.impurity_weight(len(right_index[0]))
+
                 impurity = impurity_left + impurity_right
-                # print(f"total impurity: {impurity}.")
                 # print("feat: ", i, " split at: ", threshold, " gives impurity =",impurity)
                 if(impurity<split_impurity):
                     # print("!winner! feat: ", i, " split at: ", threshold, "  impurity=",impurity)
@@ -276,7 +279,7 @@ class DecisionTree():
         pass
 
 
-def print_tree_structure(tree, feature_names=None):
+def get_tree_structure(tree, feature_names=None):
     """
     Recursively print the given tree. 
     Heavily inspired by scikit-learn's export_text()
@@ -297,7 +300,7 @@ def print_tree_structure(tree, feature_names=None):
     else:
         features = feature_names
 
-    print_tree_structure.string = ""
+    get_tree_structure.string = ""
     spacing = 3
     truncation_fmt = "{} {}\n"
     value_fmt = "{}{}{}\n" #value_fmt = "{}{}{}\n"
@@ -306,7 +309,7 @@ def print_tree_structure(tree, feature_names=None):
         classification = tree.classes[np.argmax(probabilities)]
         val = ''
         val += ' class: ' + str(classification) + ',    prediction: ' + str(["%.1f" % prob for prob in probabilities])
-        print_tree_structure.string += value_fmt.format(indent, '', val)
+        get_tree_structure.string += value_fmt.format(indent, '', val)
 
     
     def recursively_print_tree(node, depth):
@@ -330,19 +333,19 @@ def print_tree_structure(tree, feature_names=None):
                 threshold = "{:d}".format(threshold)
                 right_child_fmt = "{} {} == {}\n"
                 left_child_fmt = "{} {} !=  {}\n"
-            print_tree_structure.string += right_child_fmt.format(indent,
+            get_tree_structure.string += right_child_fmt.format(indent,
                                                          name,
                                                          threshold)
-            print_tree_structure.string += info_fmt_left
+            get_tree_structure.string += info_fmt_left
             recursively_print_tree(node.left, depth+1)
-            print_tree_structure.string += left_child_fmt.format(indent,
+            get_tree_structure.string += left_child_fmt.format(indent,
                                                         name,
                                                         threshold)
-            print_tree_structure.string += info_fmt_right
+            get_tree_structure.string += info_fmt_right
             recursively_print_tree(node.right, depth+1)
 
     recursively_print_tree(root, 1)
-    return print_tree_structure.string
+    return get_tree_structure.string
 
 
 class Node():
@@ -391,15 +394,12 @@ def accuracy(pred, actual):
 
 
 def test_breast_cancer(plot=False, print_tree=False, random=13):
-
     from sklearn.datasets import load_breast_cancer
-    from sklearn.model_selection import train_test_split
 
     data = load_breast_cancer()
     compare_trees_dataframe(data,random=random,name="breast cancer",plot=plot, print_tree=print_tree, feature_names=data['feature_names'])
 
 def test_iris(plot=False, print_tree=False, random=13):
-
     from sklearn.datasets import load_iris
 
     data = load_iris()
@@ -459,7 +459,7 @@ def build_and_test_tree(X_train, y_train, X_test, y_test, max_depth=5, max_leaf_
     if print_tree:
         print()
         print("The tree using my own code:")
-        print(print_tree_structure(tree,feature_names=feature_names))
+        print(get_tree_structure(tree,feature_names=feature_names))
     return tree
 
 
@@ -467,9 +467,9 @@ if __name__ == '__main__':
 
     
 
-    test_iris(plot=False,print_tree=True,random=43)
-    # print()
-    # test_breast_cancer(print_tree=True)
+    test_iris(plot=False,print_tree=True,random=13)
+    print()
+    test_breast_cancer(print_tree=True)
     
 
 
