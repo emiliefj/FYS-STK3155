@@ -128,6 +128,8 @@ class RandomForest(Bagging):
 
 class AdaptiveBoosting(Bagging):
     '''
+    Code influenced by scikit-learn's AdaBoostClassifier:
+    https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostClassifier.html
     Algorithm:
     Step 1: assign equal weight to each observation
     weights = np.ones()*1./X.shape[0]
@@ -143,13 +145,10 @@ class AdaptiveBoosting(Bagging):
     '''
     def fit(self, X, y):
         '''
-        Fits each of the N_trees to a subset of the input data X and
-        y. The data to fit to is a subset of size n_samples drawn 
-        randomly from X and y for each tree. The trees are stored 
-        in a list for future predictions.
-        After each fitting, the result is evaluated and input that is 
-        wrongly classified gets increased weight, meaning these are
-        more likely to be used for fitting in subsequent trees.
+        Fits each of the N_trees to the input data. After each fitting, 
+        the result is evaluated and input that is wrongly classified 
+        gets increased weight, meaning these are more likely to be used 
+        for fitting in subsequent trees.
         I am using scikit-learn's DecisionTreeClassifier in place of 
         my own DecisionTree as the latter is not optimized for speed.
 
@@ -158,54 +157,36 @@ class AdaptiveBoosting(Bagging):
         '''
         self.classes = np.unique(y)
         self.trees = []
-        N = len(y) 
-        n = self.n_samples
-        if isinstance(n,float):
-            n = int(N*n)
-
+        # N = len(y) 
+        # n = self.n_samples
+        # if isinstance(n,float):
+        #     n = int(N*n)
+        N = len(y)
         # Initialize weights:
-        w = (np.ones(N)*1./N).reshape(-1,1)
+        w = (np.ones(N)*1./N)#.reshape(-1,1)
 
         for i in range(self.N_trees):
-            # draw random sample of input
-            # probability of index being selected is proportional to weight at that index
-            # batch = np.random.randint(N,size=n)
-            batch = np.random.choice(N,size=n,p=w.flatten())
-            w_ = w[batch]
-            X_ = X[batch]
-            y_ = y[batch]
 
             # Using scikit-learn's decision tree for improved speed
             tree = DecisionTreeClassifier(criterion=self.measure, max_depth=self.max_depth, min_samples_leaf=self.min_samples_leaf, random_state=self.seed, max_leaf_nodes=self.max_leaf_nodes)
-            tree.fit(X_,y_)
+            # The fit includes weighing inputs using current weight array
+            tree.fit(X,y,sample_weight=w)
             self.trees.append(tree)
 
+            y_pred = tree.predict(X)
+            wrong = y_pred != y
+            error = np.mean(np.average(wrong, weights=w, axis=0))            
 
-            y_pred = tree.predict(X_)
-            wrong = np.where(y_pred==y_, 0, 1).reshape(-1,1)            
-
-            # update weights:
-            # calculate error by summing up the weight of those misclassified
-            error = np.sum(w_*wrong)
             if error==0:
                   # if error is 0, we don't want to change the weights
                 alpha = 0
             else:
                 alpha = np.log((1.-error)/error)
 
-            wrong[wrong == 0] = -1
-            w[batch] = w_*np.exp(alpha*wrong)
-
+            # updating weights
+            w = w*np.exp(alpha*wrong)
             # re-normalizing to sum to one
             w = w/np.sum(w) 
-
-
-            # Step 3: calculate error by summing up the weight of those misclassified
-            # error = sum(weights of misclassified observation)/sum(weights)
-            # Step 4: update weights of the misclassified entries using the quantity
-            # alpha=log(1−error)/error: weight_i = weight_i*exp(alpha) for incorrectly
-            # classified entries, and weight_i = weight_i*exp(-alpha) for correctly
-            # classified entries.
 
 
 if __name__ == '__main__':
@@ -218,6 +199,7 @@ if __name__ == '__main__':
     from sklearn.tree import DecisionTreeClassifier
     from sklearn.ensemble import BaggingClassifier
     from sklearn.ensemble import RandomForestClassifier
+    from sklearn.ensemble import AdaBoostClassifier
 
     # Load and split data
     data = load_breast_cancer()
@@ -226,30 +208,12 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=99)
 
     n_trees = 100
-    n_samples = 1.0
+    n_samples = 0.5
     n_features = 5
     max_depth = 1
     min_samples_leaf=1
     max_leaf_nodes=2
     random = 99
-
-    # Own bagging code
-    bagging = Bagging(n_trees,n_samples=n_samples,max_depth=max_depth, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes,seed=random)
-    bagging.fit(X_train,y_train)
-    y_pred = bagging.predict(X_train)
-    print(f"\nTesting bagging code on breast cancer dataset:")
-    print("Train accuracy: ", dt.accuracy(y_pred,y_train))
-    y_pred = bagging.predict(X_test)
-    print("Test accuracy: ", dt.accuracy(y_pred,y_test))
-
-    # Own random forest code
-    rf = RandomForest(n_trees,n_samples=n_samples,n_features=n_features, max_depth=max_depth, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes,seed=random)
-    rf.fit(X_train,y_train)
-    y_pred = rf.predict(X_train)
-    print(f"\nTesting random forest code on breast cancer dataset:")
-    print("Train accuracy: ", dt.accuracy(y_pred,y_train))
-    y_pred = rf.predict(X_test)
-    print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
     # One tree
     sk_tree = DecisionTreeClassifier(max_depth=max_depth, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes,random_state=random)
@@ -260,28 +224,46 @@ if __name__ == '__main__':
     y_pred = sk_tree.predict(X_test)
     print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
-    # from sklearn.tree import export_text
-    # print()
-    # print("The tree using scikitlearn's DecisionTreeClassifier:")
-    # print(export_text(sk_tree, feature_names=list(features)))
+    # # from sklearn.tree import export_text
+    # # print()
+    # # print("The tree using scikitlearn's DecisionTreeClassifier:")
+    # # print(export_text(sk_tree, feature_names=list(features)))
 
-    # scikit-learn's Bagging module
-    tree = BaggingClassifier(sk_tree, n_estimators=n_trees,max_samples=n_samples, bootstrap=True, n_jobs=-1, random_state=random)
-    tree.fit(X_train, y_train)
-    y_pred = tree.predict(X_train)
-    print(f"\nTesting scikit-learn's BaggingClassifier on breast cancer dataset:")
-    print("Train accuracy: ", dt.accuracy(y_pred,y_train))
-    y_pred = tree.predict(X_test)
-    print("Test accuracy: ", dt.accuracy(y_pred,y_test))
+    # # Own bagging code
+    # bagging = Bagging(n_trees,n_samples=n_samples,max_depth=max_depth, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes,seed=random)
+    # bagging.fit(X_train,y_train)
+    # y_pred = bagging.predict(X_train)
+    # print(f"\nTesting bagging code on breast cancer dataset:")
+    # print("Train accuracy: ", dt.accuracy(y_pred,y_train))
+    # y_pred = bagging.predict(X_test)
+    # print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
-    # scikit-learn's RandomForestClassifier module
-    tree = RandomForestClassifier(n_estimators=n_trees, max_depth=max_depth, max_samples=None, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, max_features='auto', bootstrap=True, n_jobs=-1, random_state=random)
-    tree.fit(X_train, y_train)
-    y_pred = tree.predict(X_train)
-    print(f"\nTesting scikit-learn's RandomForestClassifier on breast cancer dataset:")
-    print("Train accuracy: ", dt.accuracy(y_pred,y_train))
-    y_pred = tree.predict(X_test)
-    print("Test accuracy: ", dt.accuracy(y_pred,y_test))
+    # # scikit-learn's Bagging module
+    # tree = BaggingClassifier(sk_tree, n_estimators=n_trees,max_samples=n_samples, bootstrap=True, n_jobs=-1, random_state=random)
+    # tree.fit(X_train, y_train)
+    # y_pred = tree.predict(X_train)
+    # print(f"\nTesting scikit-learn's BaggingClassifier on breast cancer dataset:")
+    # print("Train accuracy: ", dt.accuracy(y_pred,y_train))
+    # y_pred = tree.predict(X_test)
+    # print("Test accuracy: ", dt.accuracy(y_pred,y_test))
+
+    # # Own random forest code
+    # rf = RandomForest(n_trees,n_samples=n_samples,n_features=n_features, max_depth=max_depth, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes,seed=random)
+    # rf.fit(X_train,y_train)
+    # y_pred = rf.predict(X_train)
+    # print(f"\nTesting random forest code on breast cancer dataset:")
+    # print("Train accuracy: ", dt.accuracy(y_pred,y_train))
+    # y_pred = rf.predict(X_test)
+    # print("Test accuracy: ", dt.accuracy(y_pred,y_test))
+
+    # # scikit-learn's RandomForestClassifier module
+    # tree = RandomForestClassifier(n_estimators=n_trees, max_depth=max_depth, max_samples=None, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, max_features='auto', bootstrap=True, n_jobs=-1, random_state=random)
+    # tree.fit(X_train, y_train)
+    # y_pred = tree.predict(X_train)
+    # print(f"\nTesting scikit-learn's RandomForestClassifier on breast cancer dataset:")
+    # print("Train accuracy: ", dt.accuracy(y_pred,y_train))
+    # y_pred = tree.predict(X_test)
+    # print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
     # Own Adaptive Boosting code
     ab = AdaptiveBoosting(n_trees,n_samples=n_samples, max_depth=max_depth, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes,seed=random)
@@ -290,6 +272,15 @@ if __name__ == '__main__':
     print(f"\nTesting adaptive boosting code on breast cancer dataset:")
     print("Train accuracy: ", dt.accuracy(y_pred,y_train))
     y_pred = ab.predict(X_test)
+    print("Test accuracy: ", dt.accuracy(y_pred,y_test))
+
+    # scikit-learn's AdaBoostClassifier module
+    tree = AdaBoostClassifier(sk_tree, n_estimators=n_trees, random_state=random)
+    tree.fit(X_train, y_train)
+    y_pred = tree.predict(X_train)
+    print(f"\nTesting scikit-learn's AdaBoostClassifier on breast cancer dataset:")
+    print("Train accuracy: ", dt.accuracy(y_pred,y_train))
+    y_pred = tree.predict(X_test)
     print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
 
