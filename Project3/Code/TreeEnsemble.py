@@ -72,6 +72,18 @@ class Bagging(TreeEnsemble):
             pred_sum = pred_sum+tree.predict_proba(X)
         return  self.classes[np.argmax(pred_sum,axis=1)]
 
+    def predict_probabilities(self, X):
+        '''
+        Finds the average predicted probabilities for each class for
+        the data in X.
+
+        X   - The data to make prediction for
+        '''
+        pred_sum = np.zeros((X.shape[0],len(self.classes)))
+        for tree in self.trees:
+            pred_sum = pred_sum+tree.predict_proba(X)
+        return  pred_sum/self.N_trees
+
 class RandomForest(Bagging):
 
     def fit(self, X, y):
