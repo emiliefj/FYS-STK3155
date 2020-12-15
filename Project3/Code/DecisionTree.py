@@ -11,11 +11,10 @@ class DecisionTree():
 
 
     '''
-    def __init__(self, impurity_measure='gini', max_depth=5, min_samples_leaf=1, max_leaf_nodes=10,seed=71,print_success=True):
+    def __init__(self, impurity_measure='gini', max_depth=5, max_leaf_nodes=10,seed=71,print_success=True):
         np.random.seed(seed)
         self.measure = impurity_measure.lower()
         self.max_depth = max_depth
-        self.min_samples_leaf = min_samples_leaf
         self.max_leaf_nodes = max_leaf_nodes
         self.print=print_success
 
@@ -418,16 +417,16 @@ def compare_trees(X_train,y_train,X_test,y_test, max_depth=5, max_leaf_nodes=10,
     from sklearn.model_selection import train_test_split
 
     build_and_test_tree(X_train,y_train,X_test,y_test,max_depth=max_depth, max_leaf_nodes=max_leaf_nodes, random=random, name=name, print_tree=print_tree, feature_names=feature_names)
-    test_scikit_tree(X_train,y_train,X_test,y_test,max_depth=max_depth, random=3, name=name, plot=plot, print_tree=print_tree, feature_names=feature_names)
+    test_scikit_tree(X_train,y_train,X_test,y_test,max_depth=max_depth, max_leaf_nodes=max_leaf_nodes, random=random, name=name, plot=plot, print_tree=print_tree, feature_names=feature_names)
 
 
-def test_scikit_tree(X_train, y_train, X_test, y_test, max_depth=5, random=13, name="iris", plot=False, print_tree=False, feature_names=None):
+def test_scikit_tree(X_train, y_train, X_test, y_test, max_depth=5, max_leaf_nodes=10, random=13, name="iris", plot=False, print_tree=False, feature_names=None):
     from sklearn.tree import DecisionTreeClassifier
     sk_tree = DecisionTreeClassifier(max_depth=max_depth, random_state=random)
     sk_tree.fit(X_train,y_train)
     y_pred = sk_tree.predict(X_train)
     print()
-    print(f"\nTesting scikit-learn's DecisionTreeClassifier on {name} dataset:")
+    print(f"\nTesting scikit-learn's DecisionTreeClassifier on {name} dataset with max_depth = {max_depth} and max_leaf_nodes = {max_leaf_nodes}:")
     print("Train accuracy: ", accuracy(y_pred,y_train))
     y_pred = sk_tree.predict(X_test)
     print("Test accuracy: ", accuracy(y_pred,y_test))
@@ -444,13 +443,13 @@ def test_scikit_tree(X_train, y_train, X_test, y_test, max_depth=5, random=13, n
         print(export_text(sk_tree, feature_names=list(feature_names)))
 
         
-def build_and_test_tree(X_train, y_train, X_test, y_test, max_depth=5, max_leaf_nodes=10, random=13, name="iris", print_tree=False, feature_names=None):
+def build_and_test_tree(X_train, y_train, X_test, y_test, max_depth=5, max_leaf_nodes=10, random=13, name="iris", print_tree=False, feature_names=None, print_success=False):
 
-    tree = DecisionTree(max_depth=max_depth, max_leaf_nodes=max_leaf_nodes,seed=random)
+    tree = DecisionTree(max_depth=max_depth, max_leaf_nodes=max_leaf_nodes,seed=random,print_success=print_success)
     tree.fit(X_train,y_train)
     y_pred = tree.predict(X_train)
 
-    print(f"\nTesting own decision tree code on {name} dataset:")
+    print(f"\nTesting own decision tree code on {name} dataset with max_depth = {max_depth} and max_leaf_nodes = {max_leaf_nodes}:")
     print("Train accuracy: ", accuracy(y_pred,y_train))
     y_pred = tree.predict(X_test)
     print("Test accuracy: ", accuracy(y_pred,y_test))

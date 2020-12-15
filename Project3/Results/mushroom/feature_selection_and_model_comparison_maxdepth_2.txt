@@ -1,0 +1,56 @@
+The 17 features selected when using a variance threshold of 0.8 as cutoff are: ['cap-shape', 'cap-surface', 'cap-color', 'bruises', 'odor', 'gill-size', 'gill-color', 'stalk-shape', 'stalk-root', 'stalk-surface-above-ring', 'stalk-surface-below-ring', 'stalk-color-above-ring', 'stalk-color-below-ring', 'ring-type', 'spore-print-color', 'population', 'habitat'] leaving out the features: ['gill-attachment', 'gill-spacing', 'veil-color', 'ring-number']
+
+The top 7 features according to their chi-squared score are: ['gill-color', 'ring-type', 'gill-size', 'bruises', 'stalk-root', 'habitat', 'gill-spacing'].
+
+The top 14 features according to their mutual information score are: ['odor', 'spore-print-color', 'gill-color', 'ring-type', 'stalk-surface-above-ring', 'stalk-surface-below-ring', 'stalk-color-above-ring', 'stalk-color-below-ring', 'gill-size', 'population', 'bruises', 'habitat', 'stalk-root', 'gill-spacing'].
+
+
+All features included in fit:
+
+Testing own decision tree code on mushroom dataset with max_depth = 2 and max_leaf_nodes = 5:
+Train accuracy:  0.956289759901498
+Test accuracy:  0.944
+
+
+Testing scikit-learn's DecisionTreeClassifier on mushroom dataset with max_depth = 2 and max_leaf_nodes = 5:
+Train accuracy:  0.9105273958547097
+Test accuracy:  0.9132307692307692
+
+
+Using features selected using variance threshold:
+
+Testing own decision tree code on mushroom dataset with max_depth = 2 and max_leaf_nodes = 5:
+Train accuracy:  0.956289759901498
+Test accuracy:  0.944
+
+
+Using features selected using univariate feature selection with chi2:
+
+Testing own decision tree code on mushroom dataset with max_depth = 2 and max_leaf_nodes = 5:
+Train accuracy:  0.9033449620357069
+Test accuracy:  0.904
+
+
+Using features selected using univariate feature selection with mutual information:
+
+Testing own decision tree code on mushroom dataset with max_depth = 2 and max_leaf_nodes = 5:
+Train accuracy:  0.956289759901498
+Test accuracy:  0.944
+
+
+Accuracy on mushroom dataset using logistic regression with a learning rate of 1.0, 100 epochs and a batchsize of 50 is: 
+Training: 0.9540324235583829
+Validation: 0.9581538461538461
+
+
+Testing bagging code on mushroom dataset with max_depth = 2 and max_leaf_nodes = 5, using a fraction 0.5 of the total training data at each fitting:
+Train accuracy:  0.9105273958547097
+Test accuracy:  0.9132307692307692
+
+Testing random forest code on mushroom dataset with max_depth = 2 and max_leaf_nodes = 5, using a fraction 0.5 of the total training data and 5 features at each fitting:
+Train accuracy:  0.9335111840755181
+Test accuracy:  0.9384615384615385
+
+Testing adaptive boosting code on mushroom dataset with max_depth = 2 and max_leaf_nodes = 5:
+Train accuracy:  1.0
+Test accuracy:  1.0

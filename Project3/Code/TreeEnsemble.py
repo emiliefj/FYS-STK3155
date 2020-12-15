@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.utils import resample
+from sklearn.tree import DecisionTreeClassifier
 
 import warnings
 
@@ -10,7 +11,6 @@ import DecisionTree as dt
 
 class TreeEnsemble:
     def __init__(self, N_trees, n_samples=0.5, n_features=None, impurity_measure='gini', max_depth=5, min_samples_leaf=1, max_leaf_nodes=None,  seed=77):
-        from sklearn.tree import DecisionTreeClassifier
         np.random.seed(seed)
         self.seed = seed
         self.N_trees = N_trees
@@ -224,46 +224,46 @@ if __name__ == '__main__':
     y_pred = sk_tree.predict(X_test)
     print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
-    # # from sklearn.tree import export_text
-    # # print()
-    # # print("The tree using scikitlearn's DecisionTreeClassifier:")
-    # # print(export_text(sk_tree, feature_names=list(features)))
+    # from sklearn.tree import export_text
+    # print()
+    # print("The tree using scikitlearn's DecisionTreeClassifier:")
+    # print(export_text(sk_tree, feature_names=list(features)))
 
-    # # Own bagging code
-    # bagging = Bagging(n_trees,n_samples=n_samples,max_depth=max_depth, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes,seed=random)
-    # bagging.fit(X_train,y_train)
-    # y_pred = bagging.predict(X_train)
-    # print(f"\nTesting bagging code on breast cancer dataset:")
-    # print("Train accuracy: ", dt.accuracy(y_pred,y_train))
-    # y_pred = bagging.predict(X_test)
-    # print("Test accuracy: ", dt.accuracy(y_pred,y_test))
+    # Own bagging code
+    bagging = Bagging(n_trees,n_samples=n_samples,max_depth=max_depth, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes,seed=random)
+    bagging.fit(X_train,y_train)
+    y_pred = bagging.predict(X_train)
+    print(f"\nTesting bagging code on breast cancer dataset:")
+    print("Train accuracy: ", dt.accuracy(y_pred,y_train))
+    y_pred = bagging.predict(X_test)
+    print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
-    # # scikit-learn's Bagging module
-    # tree = BaggingClassifier(sk_tree, n_estimators=n_trees,max_samples=n_samples, bootstrap=True, n_jobs=-1, random_state=random)
-    # tree.fit(X_train, y_train)
-    # y_pred = tree.predict(X_train)
-    # print(f"\nTesting scikit-learn's BaggingClassifier on breast cancer dataset:")
-    # print("Train accuracy: ", dt.accuracy(y_pred,y_train))
-    # y_pred = tree.predict(X_test)
-    # print("Test accuracy: ", dt.accuracy(y_pred,y_test))
+    # scikit-learn's Bagging module
+    tree = BaggingClassifier(sk_tree, n_estimators=n_trees,max_samples=n_samples, bootstrap=True, n_jobs=-1, random_state=random)
+    tree.fit(X_train, y_train)
+    y_pred = tree.predict(X_train)
+    print(f"\nTesting scikit-learn's BaggingClassifier on breast cancer dataset:")
+    print("Train accuracy: ", dt.accuracy(y_pred,y_train))
+    y_pred = tree.predict(X_test)
+    print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
-    # # Own random forest code
-    # rf = RandomForest(n_trees,n_samples=n_samples,n_features=n_features, max_depth=max_depth, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes,seed=random)
-    # rf.fit(X_train,y_train)
-    # y_pred = rf.predict(X_train)
-    # print(f"\nTesting random forest code on breast cancer dataset:")
-    # print("Train accuracy: ", dt.accuracy(y_pred,y_train))
-    # y_pred = rf.predict(X_test)
-    # print("Test accuracy: ", dt.accuracy(y_pred,y_test))
+    # Own random forest code
+    rf = RandomForest(n_trees,n_samples=n_samples,n_features=n_features, max_depth=max_depth, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes,seed=random)
+    rf.fit(X_train,y_train)
+    y_pred = rf.predict(X_train)
+    print(f"\nTesting random forest code on breast cancer dataset:")
+    print("Train accuracy: ", dt.accuracy(y_pred,y_train))
+    y_pred = rf.predict(X_test)
+    print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
-    # # scikit-learn's RandomForestClassifier module
-    # tree = RandomForestClassifier(n_estimators=n_trees, max_depth=max_depth, max_samples=None, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, max_features='auto', bootstrap=True, n_jobs=-1, random_state=random)
-    # tree.fit(X_train, y_train)
-    # y_pred = tree.predict(X_train)
-    # print(f"\nTesting scikit-learn's RandomForestClassifier on breast cancer dataset:")
-    # print("Train accuracy: ", dt.accuracy(y_pred,y_train))
-    # y_pred = tree.predict(X_test)
-    # print("Test accuracy: ", dt.accuracy(y_pred,y_test))
+    # scikit-learn's RandomForestClassifier module
+    tree = RandomForestClassifier(n_estimators=n_trees, max_depth=max_depth, max_samples=None, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, max_features='auto', bootstrap=True, n_jobs=-1, random_state=random)
+    tree.fit(X_train, y_train)
+    y_pred = tree.predict(X_train)
+    print(f"\nTesting scikit-learn's RandomForestClassifier on breast cancer dataset:")
+    print("Train accuracy: ", dt.accuracy(y_pred,y_train))
+    y_pred = tree.predict(X_test)
+    print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
     # Own Adaptive Boosting code
     ab = AdaptiveBoosting(n_trees,n_samples=n_samples, max_depth=max_depth, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes,seed=random)
