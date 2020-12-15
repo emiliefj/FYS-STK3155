@@ -26,6 +26,7 @@
     \usepackage{float}
     \floatplacement{figure}{H} % forces figures to be placed at the correct location
     \usepackage{xcolor} % Allow colors to be defined
+    %\usepackage[table,xcdraw]{xcolor}
     \usepackage{enumerate} % Needed for markdown enumerations to work
     \usepackage{geometry} % Used to adjust the document margins
     \usepackage{amsmath} % Equations
@@ -788,91 +789,32 @@ The matrix consists of one row and one column per class. The rows represent the 
 \subsubsection{ROC Curve}\label{roc-curve}}
 A receiver operating characteristic curve, or ROC curve, is another tool for visualizing a model's predictive performance, more specifically a binary model. It consists of a graphical plot of false positive rate vs true positive rate for a set of discriminative thresholds. The area under the curve is one measure of model performance, with a perfect model getting a score of one.
 
+\hypertarget{ext-lib}{%
+	\subsection{Extermal Libraries}\label{ext-lib}}
+
 \hypertarget{results-and-discussion}{%
 \section{Results and Discussion}\label{results-and-discussion}}
 
+
+\hypertarget{mushroom-dataset}{%
+	\subsection{Mushroom Dataset}\label{mushroom-dataset}}
+
     \hypertarget{pre-processing-the-data}{%
-\subsection{Pre-processing the Data}\label{pre-processing-the-data}}
+\subsubsection{Pre-processing the Data}\label{pre-processing-the-data}}
 
-    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{2}{\boxspacing}
-\begin{Verbatim}[commandchars=\\\{\}]
-\PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np} 
-\PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
-\PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
-\PY{k+kn}{import} \PY{n+nn}{sys}
-\PY{n}{sys}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{../Code}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-\PY{n}{sys}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{../Data}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-\PY{k+kn}{import} \PY{n+nn}{DecisionTree} \PY{k}{as} \PY{n+nn}{dt}
 
-\PY{n}{df} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}csv}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{../Data/Mushroom/UCI MLR/agaricus\PYZhy{}lepiota.data.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} 
-                 \PY{n}{names}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{class}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{cap\PYZhy{}shape}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{cap\PYZhy{}surface}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{cap\PYZhy{}color}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
-                 \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{bruises}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{odor}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gill\PYZhy{}attachment}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gill\PYZhy{}spacing}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
-                 \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gill\PYZhy{}size}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gill\PYZhy{}color}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{stalk\PYZhy{}shape}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{stalk\PYZhy{}root}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
-                 \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{stalk\PYZhy{}surface\PYZhy{}above\PYZhy{}ring}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{stalk\PYZhy{}surface\PYZhy{}below\PYZhy{}ring}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
-                 \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{stalk\PYZhy{}color\PYZhy{}above\PYZhy{}ring}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{stalk\PYZhy{}color\PYZhy{}below\PYZhy{}ring}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
-                 \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{veil\PYZhy{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{veil\PYZhy{}color}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ring\PYZhy{}number}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ring\PYZhy{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
-                 \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{spore\PYZhy{}print\PYZhy{}color}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{population}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{habitat}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
-
-\PY{n}{df}\PY{o}{.}\PY{n}{head}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-\end{tcolorbox}
-
-            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
-\prompt{Out}{outcolor}{2}{\boxspacing}
-\begin{Verbatim}[commandchars=\\\{\}]
-  class cap-shape cap-surface cap-color bruises odor gill-attachment  \textbackslash{}
-0     p         x           s         n       t    p               f
-1     e         x           s         y       t    a               f
-2     e         b           s         w       t    l               f
-3     p         x           y         w       t    p               f
-4     e         x           s         g       f    n               f
-
-  gill-spacing gill-size gill-color  {\ldots} stalk-surface-below-ring  \textbackslash{}
-0            c         n          k  {\ldots}                        s
-1            c         b          k  {\ldots}                        s
-2            c         b          n  {\ldots}                        s
-3            c         n          n  {\ldots}                        s
-4            w         b          k  {\ldots}                        s
-
-  stalk-color-above-ring stalk-color-below-ring veil-type veil-color  \textbackslash{}
-0                      w                      w         p          w
-1                      w                      w         p          w
-2                      w                      w         p          w
-3                      w                      w         p          w
-4                      w                      w         p          w
-
-  ring-number ring-type spore-print-color population habitat
-0           o         p                 k          s       u
-1           o         p                 n          n       g
-2           o         p                 n          n       m
-3           o         p                 k          s       u
-4           o         e                 n          a       g
-
-[5 rows x 23 columns]
-\end{Verbatim}
-\end{tcolorbox}
-        
     As we know, all the features of this dataset are categorical. We can
 first explore the data by looking at the unique values for each feature,
-see table number.
-
-    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{89}{\boxspacing}
-\begin{Verbatim}[commandchars=\\\{\}]
-\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Table 1: Unique values of the features in the mushroom data set.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-\PY{n}{pd}\PY{o}{.}\PY{n}{concat}\PY{p}{(}\PY{p}{\PYZob{}}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{unique values}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n}{df}\PY{o}{.}\PY{n}{apply}\PY{p}{(}\PY{n}{pd}\PY{o}{.}\PY{n}{unique}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsh{} unique values}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n}{df}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}\PY{p}{\PYZcb{}}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
-\end{Verbatim}
-\end{tcolorbox}
+see table 1.
 
     \begin{Verbatim}[commandchars=\\\{\}]
 Table 1: Unique values of the features in the mushroom data set.
     \end{Verbatim}
 
             \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
-\prompt{Out}{outcolor}{89}{\boxspacing}
+{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-                                                 unique values  \textbackslash{}
+                                                 unique values  
 class                                                   [p, e]
 cap-shape                                   [x, b, s, f, k, c]
 cap-surface                                       [s, y, f, g]
@@ -896,48 +838,14 @@ ring-type                                      [p, e, l, f, n]
 spore-print-color                  [k, n, u, h, w, r, o, y, b]
 population                                  [s, n, a, v, y, c]
 habitat                                  [u, g, m, d, p, w, l]
-
-                          \# unique values
-class                                   2
-cap-shape                               6
-cap-surface                             4
-cap-color                              10
-bruises                                 2
-odor                                    9
-gill-attachment                         2
-gill-spacing                            2
-gill-size                               2
-gill-color                             12
-stalk-shape                             2
-stalk-root                              5
-stalk-surface-above-ring                4
-stalk-surface-below-ring                4
-stalk-color-above-ring                  9
-stalk-color-below-ring                  9
-veil-type                               1
-veil-color                              4
-ring-number                             3
-ring-type                               5
-spore-print-color                       9
-population                              6
-habitat                                 7
 \end{Verbatim}
 \end{tcolorbox}
         
-    As we can see, there is only one used value for veil-type, `p' or
+    As we can see, there is only one used value for $\texttt{veil-type}$, 'p' or
 partial. This feature then provides us with no information that we can
 use to distinguish the different mushrooms, and we remove the feature
 completely. We also check to make sure none of the entries are missing
-values.
-
-    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{90}{\boxspacing}
-\begin{Verbatim}[commandchars=\\\{\}]
-\PY{n}{df}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{n}{columns}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{veil\PYZhy{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{inplace}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
-\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Table 2: The number of missing values for each features. We see that no values are missing.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-\PY{n}{df}\PY{o}{.}\PY{n}{isnull}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-\end{tcolorbox}
+values, see table 2.
 
     \begin{Verbatim}[commandchars=\\\{\}]
 Table 2: The number of missing values for each features. We see that no values
@@ -974,21 +882,9 @@ dtype: int64
 \end{tcolorbox}
         
     Another point of interest is whether the data are fairly evenly divided
-amongst the two categories. The check this by comparing the number of
-entries belonging to each class.
+among the two categories. We check this by comparing the number of
+entries belonging to each class as shown in figure number.
 
-    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{91}{\boxspacing}
-\begin{Verbatim}[commandchars=\\\{\}]
-\PY{c+c1}{\PYZsh{} Creating histogram }
-\PY{k+kn}{import} \PY{n+nn}{seaborn} \PY{k}{as} \PY{n+nn}{sns}
-\PY{n}{s} \PY{o}{=} \PY{n}{sns}\PY{o}{.}\PY{n}{countplot}\PY{p}{(}\PY{n}{x} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{class}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{data} \PY{o}{=} \PY{n}{df}\PY{p}{)}
-\PY{c+c1}{\PYZsh{} Show plot }
-\PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)} 
-\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Figure 2: Histogram of class distribution. We can see the dataset contains a fairly even split between the two}\PY{l+s+se}{\PYZbs{}}
-\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{classes.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-\end{Verbatim}
-\end{tcolorbox}
 
     \begin{center}
     \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_34_0.png}
@@ -1001,67 +897,8 @@ fairly even split between the two
 classes.
     \end{Verbatim}
 
-    Figure number shows a heatmat of the correlations between the features.
+    Figure number shows a heatmap of the correlations between the features.
 
-    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{92}{\boxspacing}
-\begin{Verbatim}[commandchars=\\\{\}]
-\PY{c+c1}{\PYZsh{} Now we have a look at the correlation matrix}
-\PY{n}{df\PYZus{}numerical} \PY{o}{=} \PY{n}{df}
-\PY{c+c1}{\PYZsh{} First we need to map to number\PYZhy{}values}
-\PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{preprocessing} \PY{k+kn}{import} \PY{n}{LabelEncoder}
-\PY{n}{les} \PY{o}{=} \PY{p}{\PYZob{}}\PY{n}{col}\PY{p}{:} \PY{n}{LabelEncoder}\PY{p}{(}\PY{p}{)} \PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{df\PYZus{}numerical}\PY{o}{.}\PY{n}{columns}\PY{p}{\PYZcb{}}
-\PY{k}{for} \PY{n}{col} \PY{o+ow}{in} \PY{n}{les}\PY{p}{:}
-    \PY{n}{df\PYZus{}numerical}\PY{p}{[}\PY{n}{col}\PY{p}{]} \PY{o}{=} \PY{n}{les}\PY{p}{[}\PY{n}{col}\PY{p}{]}\PY{o}{.}\PY{n}{fit\PYZus{}transform}\PY{p}{(}\PY{n}{df\PYZus{}numerical}\PY{p}{[}\PY{n}{col}\PY{p}{]}\PY{p}{)}
-
-\PY{n}{df\PYZus{}numerical}\PY{o}{.}\PY{n}{head}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-\end{tcolorbox}
-
-            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
-\prompt{Out}{outcolor}{92}{\boxspacing}
-\begin{Verbatim}[commandchars=\\\{\}]
-   class  cap-shape  cap-surface  cap-color  bruises  odor  gill-attachment  \textbackslash{}
-0      1          5            2          4        1     6                1
-1      0          5            2          9        1     0                1
-2      0          0            2          8        1     3                1
-3      1          5            3          8        1     6                1
-4      0          5            2          3        0     5                1
-
-   gill-spacing  gill-size  gill-color  {\ldots}  stalk-surface-above-ring  \textbackslash{}
-0             0          1           4  {\ldots}                         2
-1             0          0           4  {\ldots}                         2
-2             0          0           5  {\ldots}                         2
-3             0          1           5  {\ldots}                         2
-4             1          0           4  {\ldots}                         2
-
-   stalk-surface-below-ring  stalk-color-above-ring  stalk-color-below-ring  \textbackslash{}
-0                         2                       7                       7
-1                         2                       7                       7
-2                         2                       7                       7
-3                         2                       7                       7
-4                         2                       7                       7
-
-   veil-color  ring-number  ring-type  spore-print-color  population  habitat
-0           2            1          4                  2           3        5
-1           2            1          4                  3           2        1
-2           2            1          4                  3           2        3
-3           2            1          4                  2           3        5
-4           2            1          0                  3           0        1
-
-[5 rows x 22 columns]
-\end{Verbatim}
-\end{tcolorbox}
-        
-    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{93}{\boxspacing}
-\begin{Verbatim}[commandchars=\\\{\}]
-\PY{n}{correlation\PYZus{}matrix} \PY{o}{=} \PY{n}{df\PYZus{}numerical}\PY{o}{.}\PY{n}{corr}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{round}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{)}
-\PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{n}{figsize} \PY{o}{=}\PY{p}{(}\PY{l+m+mi}{16}\PY{p}{,} \PY{l+m+mi}{12}\PY{p}{)}\PY{p}{)} 
-\PY{n}{sns}\PY{o}{.}\PY{n}{heatmap}\PY{p}{(}\PY{n}{data}\PY{o}{=}\PY{n}{correlation\PYZus{}matrix}\PY{p}{,} \PY{n}{annot}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{vmin}\PY{o}{=}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{vmax}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
-\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Figure number: A heatmap showing the correlation matrix for the features in the mushroom dataset.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-\end{Verbatim}
-\end{tcolorbox}
 
     \begin{Verbatim}[commandchars=\\\{\}]
 Figure number: A heatmap showing the correlation matrix for the features in the
@@ -1084,8 +921,10 @@ correlation of 0.9. Other fairly correlated features are
 and \(\texttt{ring-type}\), and \(\texttt{gill-size}\) and
 \(\texttt{spore-print-color}\).
 
+To prepare for model selection and model comparisons we have split the data into three parts, a training set made up of $60 \%$ of the dataset, and a validation and test set, each making up $20 \%$ of the total set.
+
     \hypertarget{feature-selection}{%
-\subsection{Feature Selection}\label{feature-selection}}
+\subsubsection{Feature Selection}\label{feature-selection}}
 
 As we have a fairly high-dimensional problem we performed feature
 selection in order to reduce the number of features. The goal for this
@@ -1102,45 +941,26 @@ We use a cutoff value of 0.8 as variance threshold, which results in
 excluding four of the features, namely \(\texttt{gill-attachment}\),
 \(\texttt{gill-spacing}\), \(\texttt{veil-color}\), and
 \(\texttt{ring-number}\). The number of features is then reduced from 21
-to 17. A plot of the variances for the different features is shown in
-figure number.
-
-    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{113}{\boxspacing}
-\begin{Verbatim}[commandchars=\\\{\}]
-\PY{c+c1}{\PYZsh{} train \PYZhy{} validaton \PYZhy{} test \PYZhy{} splitting 60 \PYZhy{} 20 \PYZhy{} 20}
-\PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{model\PYZus{}selection} \PY{k+kn}{import} \PY{n}{train\PYZus{}test\PYZus{}split}
-
-\PY{n}{seed} \PY{o}{=} \PY{l+m+mi}{68}
-\PY{n}{train\PYZus{}frac} \PY{o}{=} \PY{l+m+mf}{0.6}  \PY{c+c1}{\PYZsh{} out of the whole set}
-\PY{n}{test\PYZus{}frac} \PY{o}{=} \PY{l+m+mf}{0.5}   \PY{c+c1}{\PYZsh{} out of the non\PYZhy{}training set}
-
-\PY{n}{y} \PY{o}{=} \PY{n}{df\PYZus{}numerical}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{class}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
-\PY{n}{X} \PY{o}{=} \PY{n}{df\PYZus{}numerical}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{class}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
-
-
-\PY{n}{X\PYZus{}train}\PY{p}{,} \PY{n}{X\PYZus{}test}\PY{p}{,} \PY{n}{y\PYZus{}train}\PY{p}{,} \PY{n}{y\PYZus{}test} \PY{o}{=} \PY{n}{train\PYZus{}test\PYZus{}split}\PY{p}{(}\PY{n}{X}\PY{p}{,} \PY{n}{y}\PY{p}{,} \PY{n}{test\PYZus{}size}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{\PYZhy{}}\PY{n}{train\PYZus{}frac}\PY{p}{,} \PY{n}{random\PYZus{}state}\PY{o}{=}\PY{n}{seed}\PY{p}{)}
-\PY{n}{X\PYZus{}val}\PY{p}{,} \PY{n}{X\PYZus{}test}\PY{p}{,} \PY{n}{y\PYZus{}val}\PY{p}{,} \PY{n}{y\PYZus{}test} \PY{o}{=} \PY{n}{train\PYZus{}test\PYZus{}split}\PY{p}{(}\PY{n}{X\PYZus{}test}\PY{p}{,}\PY{n}{y\PYZus{}test}\PY{p}{,}\PY{n}{test\PYZus{}size}\PY{o}{=}\PY{n}{test\PYZus{}frac}\PY{p}{,}\PY{n}{random\PYZus{}state}\PY{o}{=}\PY{n}{seed}\PY{o}{*}\PY{l+m+mi}{3}\PY{p}{)}
-
-\PY{c+c1}{\PYZsh{}train, validate, test = np.split(df.sample(frac=1, random\PYZus{}state=42), [int(.6*len(df)), int(.8*len(df))])}
-\end{Verbatim}
-\end{tcolorbox}
-
-            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
-\prompt{Out}{outcolor}{113}{\boxspacing}
-\begin{Verbatim}[commandchars=\\\{\}]
-(1625, 21)
-\end{Verbatim}
-\end{tcolorbox}
+to 17.
         
-    We can compare this to feature selection by comparing the value of
-certain scoring functions for each of the features. The result using
+ We can compare this to univariate feature selection. The result when using
 chi-squared statistic, can be seen in figure number. We find from this
 result that comparing the features using this statistic the key features
 to include are features 8, 17, 7, 3, 10, 20, and 6, corresponding to
 \(\texttt{gill-color}\), \(\texttt{ring-type}\), \(\texttt{gill-size}\),
 \(\texttt{bruises}\), \(\texttt{stalk-root}\), \(\texttt{habitat}\), and
 \(\texttt{gill-spacing}\).
+
+\begin{center}
+	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/mushroom/ch2-scores-mushroom_small.png}
+\end{center}
+{ \hspace*{\fill} \\}
+
+%\begin{Verbatim}[commandchars=\\\{\}]
+	Figure number: Bar plot showing the chi-squared scores of the the
+	features in the mushroom dataset. We see that feature eight has the
+	clear highest score. This corresponds to \(\texttt{gill-color}\).
+%\end{Verbatim}
 
 Using instead the mutual information as scoring function we find that
 more features are included, Most notably feature four,
@@ -1150,13 +970,166 @@ more closely with our expectations as we know from the known rules
 described in the Data section that using only \(\texttt{odor}\) is
 enough to get a \(98.52\%\) accuracy on this dataset.
 
-    Figure number: Bar plot showing the chi-squared scores of the the
-features in the mushroom dataset. We see that feature eight has the
-clear highest score. This corresponds to \(\texttt{gill-color}\).
-
+    
+\begin{center}
+	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/mushroom/mutual_info-scores-mushroom_small.png}
+\end{center}
+{ \hspace*{\fill} \\}
     Figure number: Bar plot showing the mutual information scores of the the
 features in the mushroom dataset. We see that feature four,
 \(\texttt{odor}\) scores highest.
+
+    \hypertarget{model-comparisons}{%
+	\subsubsection{Model Comparisons}\label{model-comparisons}}
+
+We have fit several models to our mushroom dataset. We know from the four simple rules in the description of the dataset from the Data section, that one should not need a very complex model to achieve a fairly high precision. Table 3 shows the accuracy scores for a single 'stub', a tree with just a root node and two leaves. My DecisionTree chooses to split the root node using the $\texttt{odor}$-feature, for all trees except when using chi2 as scoring function, which uses $\texttt{ring-type}$. Alternatively $\texttt{scikit-learn}$ splits using $\texttt{gill-color}$. An example of a tree is shown in figure number, where we see the tree built with our own decision tree code using a max depth of five. Table 4 and 5 show accuracy results for trees with a max depth of two and five, respectively. We see from these results that even for very small trees we get a fairly high accuracy, and already at a depth of five we are nearing a perfect score. Somewhat surprisingly overfitting, the bane of decision trees, does not seem to be an issue.
+
+We see that our feature selection has not proved particularly useful. As expected feature selection with mutual information provides a better end result than the \(\chi^2\) test statistic, but neither are better than using all features, and considering we need such a small tree for a high accuracy, we have no need for the performance boost.
+
+{ \hspace*{\fill} \\}
+Table 3: The accuracy score for a single decision tree using various configurations of the input features. All trees have a maximum depth of 1, and two leaf nodes, also known as a 'stub'.
+\begin{table}[h!]
+	\begin{center}
+		\label{tab:table1}
+		\begin{tabular}{l|r|r}
+        \textbf{Model}                                                      		   & \textbf{Training} & \textbf{Validation}
+        \\ \hline
+		\textbf{Single decision tree, own code}                                        & 0.887             & 0.892               \\ \hline
+		\textbf{Single decision tree, scikit-learn}                                    & 0.793             & 0.785               \\ \hline
+		\textbf{Single decision tree, 17 features selected with variance threshold}    & 0.887             & 0.892               \\ \hline
+		\textbf{Single decision tree, 7 features selected with chi2}                   & 0.773             & 0.775               \\ \hline
+		\textbf{Single decision tree, 14 features selected with mutual information}    & 0.887             & 0.892               \\ \hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+{ \hspace*{\fill} \\}
+Table 4: The accuracy score for a single decision tree using various configurations of the input features. All trees have a maximum depth of 2, and max four leaf nodes, also known as a 'stub'.
+\begin{table}[h!]
+	\begin{center}
+		\label{tab:table1}
+		\begin{tabular}{l|r|r}
+			\textbf{Model}                                                      		   & \textbf{Training} & \textbf{Validation}
+			\\ \hline
+			\textbf{Single decision tree, own code}                                        & 0.956         & 0.944               \\ \hline
+			\textbf{Single decision tree, scikit-learn}                                    & 0.911         & 0.913               \\ \hline
+			\textbf{Single decision tree, 17 features selected with variance threshold}    & 0.956         & 0.944               \\ \hline
+			\textbf{Single decision tree, 7 features selected with chi2}                   & 0.903         & 0.904               \\ \hline
+			\textbf{Single decision tree, 14 features selected with mutual information}    & 0.956         & 0.944               \\ \hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+{ \hspace*{\fill} \\}
+Table 5: The accuracy score for a single decision tree using various configurations of the input features. All trees have a maximum depth of 5, and max 15 leaf nodes.
+\begin{table}[h!]
+	\begin{center}
+		\label{tab:table1}
+		\begin{tabular}{l|r|r}
+			\textbf{Model}                                                      		   & \textbf{Training} & \textbf{Validation}
+			\\ \hline
+			\textbf{Single decision tree, own code}                                        & 0.9996        & 0.9994              \\ \hline
+			\textbf{Single decision tree, scikit-learn}                                    & 0.9803        & 0.9797              \\ \hline
+			\textbf{Single decision tree, 17 features selected with variance threshold}    & 0.9996        & 0.9993              \\ \hline
+			\textbf{Single decision tree, 7 features selected with chi2}                   & 0.9602        & 0.9674              \\ \hline
+			\textbf{Single decision tree, 14 features selected with mutual information}    & 1.0           & 1.0                \\ \hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+
+\begin{BVerbatim}
+The tree using my own code:
+|--- odor == 5
+|   |--- spore-print-color == 5
+|   |   |--- class: 1,    prediction: ['0.0', '1.0']
+|   |--- spore-print-color !=  5
+|   |   |--- stalk-surface-below-ring == 3
+|   |   |   |--- ring-type == 0
+|   |   |   |   |--- class: 1,    prediction: ['0.0', '1.0']
+|   |   |   |--- ring-type !=  0
+|   |   |   |   |--- class: 0,    prediction: ['1.0', '0.0']
+|   |   |--- stalk-surface-below-ring !=  3
+|   |   |   |--- cap-surface == 1
+|   |   |   |   |--- class: 1,    prediction: ['0.0', '1.0']
+|   |   |   |--- cap-surface !=  1
+|   |   |   |   |--- gill-size == 0
+|   |   |   |   |   |--- class: 0,    prediction: ['1.0', '0.0']
+|   |   |   |   |--- gill-size !=  0
+|   |   |   |   |   |--- class: 0,    prediction: ['1.0', '0.0']
+|--- odor !=  5
+|   |--- stalk-root == 2
+|   |   |--- odor == 4
+|   |   |   |--- class: 1,    prediction: ['0.0', '1.0']
+|   |   |--- odor !=  4
+|   |   |   |--- class: 0,    prediction: ['1.0', '0.0']
+|   |--- stalk-root !=  2
+|   |   |--- stalk-root == 4
+|   |   |   |--- class: 0,    prediction: ['1.0', '0.0']
+|   |   |--- stalk-root !=  4
+|   |   |   |--- odor == 3
+|   |   |   |   |--- class: 0,    prediction: ['1.0', '0.0']
+|   |   |   |--- odor !=  3
+|   |   |   |   |--- odor == 0
+|   |   |   |   |   |--- class: 0,    prediction: ['1.0', '0.0']
+|   |   |   |   |--- odor !=  0
+|   |   |   |   |   |--- class: 1,    prediction: ['0.0', '1.0']	
+\end{BVerbatim}
+\\
+Figure number: An example of a decision tree created with our own code. The 'prediction' list gives the probabilities per class for that leaf node according to the training data. We see that the features used in creating the tree are tightly connected to those used in the four simple rules defined for the dataset.
+{ \hspace*{\fill} \\}
+
+In figure number and number we see a comparison of the confusion matrices for a stub and a larger decision tree. We see that the stub mostly misclassifies class 0, the edible class. This is good news as wrongly classifying a poisonous mushroom as edible will potentially have much more dire consequences than misclassifying an edible mushroom as poisonous.
+
+\begin{center}
+	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/mushroom/normalized_confusion_matrix_decisiontree_depth1.png}
+\end{center}
+{ \hspace*{\fill} \\}
+Figure number: The confusion matrix for a single decision tree with a depth of one.
+
+\begin{center}
+	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/mushroom/normalized_confusion_matrix_decisiontree_depth5.png}
+\end{center}
+{ \hspace*{\fill} \\}
+Figure number: The confusion matrix for a single decision tree with a depth of five.
+
+In tables 6 and 7 we look at how our ensemble methods fare. We see that bagging and random forests give no improvement to our accuracy score. This is unsurprising, as our tree did not seemed plagued by high variance. We see that using adaptive boosting gives the best accuracy, reachin an accuracy of $100\%$ using trees with a max depth of only two.
+
+{ \hspace*{\fill} \\}
+Table 6: The accuracy score for ensemble methods. All trees have a maximum depth of one, and two leaf nodes. All methods use 100 trees to build the ensemble. In random forest five features are picked at random for each tree. 
+\begin{table}[h!]
+	\begin{center}
+		\label{tab:table1}
+		\begin{tabular}{l|r|r}
+			\textbf{Model}                                                 	& \textbf{Training} & \textbf{Validation}
+			\\ \hline
+			\textbf{Bagging}                             		             & 0.793        & 0.784              \\ \hline
+			\textbf{Random forest}                                		     & 0.879        & 0.884              \\ \hline
+			\textbf{Adaptive boosting}   							    	 & 0.985        & 0.983              \\ \hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+{ \hspace*{\fill} \\}
+Table 7: The accuracy score for ensemble methods. All trees have a maximum depth of two, and four leaf nodes. All methods use 100 trees to build the ensemble. In random forest five features are picked at random for each tree. The confusion matrix here is not very interesting as it is identical to that in figure number. Figure number shows the confusion matrix for adaptive boosting using only stubs. We see once again that only edible mushrooms are misclassified, and very rarely.
+\begin{table}[h!]
+	\begin{center}
+		\label{tab:table1}
+		\begin{tabular}{l|r|r}
+			\textbf{Model}                                                 	& \textbf{Training} & \textbf{Validation}
+			\\ \hline
+			\textbf{Bagging}                             		             & 0.911        & 0.913              \\ \hline
+			\textbf{Random forest}                                		     & 0.934        & 0.938              \\ \hline
+			\textbf{Adaptive boosting}   							    	 & 1.0          & 1.0                \\ \hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+\begin{center}
+	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/mushroom/normalized_confucion_matrix_adaboost.png}
+\end{center}
+{ \hspace*{\fill} \\}
+Figure number: The confusion matrix for adaptive boosting with 100 stubs.
 
     \hypertarget{fetal-health}{%
 \subsection{Fetal Health}\label{fetal-health}}
