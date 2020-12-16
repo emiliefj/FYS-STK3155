@@ -15,6 +15,7 @@ A folder containing the code for the models used in this project, that is
 * feature_selection for methods related to feature selection using variance threshold, chi-squared, ANOVA f-test and mutual information.
 * preprosess_data for methods for splitting dataset and converting string values to numerical values
 * LogisticRegression for performing logistic regresseon, including finding optimal learning rate. 
+* *project3_mushroom.py* and *project3_fetal_health.py* contains the runthrough of the analysis done on each of the datasets.
 
 ### Data
 Contains the datasets used in the report:
