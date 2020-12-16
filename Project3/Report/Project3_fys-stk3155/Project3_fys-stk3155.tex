@@ -391,7 +391,15 @@
 
     \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
+Decision trees are a decision making tool that is used for a wide array of purposes, from flowcharts defining business processes to machine learning methods like random forests for classification of or regression on complex data. They are tightly linked to how we, as humans, make decisions and this alone makes them attractive models. They are easy to understand and interpret, and require little experience with machine learning to use. 
 
+Once a decision tree with desired qualities is created it can be visualized in a tree shaped diagram, and this diagram is enough for making predictions on future data, no machine required. Although computers will of course be faster.
+
+It sounds too good to be true, does it not? The downfall of decision trees are in general low prediction accuracy. They tend to suffer from high variablility, and for unbalanced datasets the trees tend to have high bias. For many problems, decision trees simply fall short of providing the accuracy and reliability required.
+
+This is where ensemble methods come in. By combining many, simple decision trees with inadequate performance, we can create a forest of trees that average out each others weaknesses and give a aggregated prediction with the potential of outperforming most other methods. Many variants exist, from simple bagging where we create multiple trees on bootstrap samples of the original data, to AdaBoost and XGBoost. 
+
+We explore two datasets with our chosen toolbox filled with decision trees and related methods, exploring performance, common pitfalls, strengths and weaknesses.  
     
 
     \hypertarget{data}{%
@@ -919,8 +927,8 @@ fairly even split between the two classes.
     \end{Verbatim}
 
     Figure 2 shows a heatmap of the correlations between the features.
-
-
+    
+\newpage
     \begin{Verbatim}[commandchars=\\\{\}]
 Figure 2: A heatmap showing the correlation matrix for the features in the
 mushroom dataset.
@@ -1008,7 +1016,7 @@ We have fit several models to our mushroom dataset. As a baseline I have used lo
  We know from the four simple rules in the description of the dataset from the Data section, that one should not need a very complex model to achieve a fairly high precision. Table 3 shows the accuracy scores for a single 'stub', a tree with just a root node and two leaves. My DecisionTree chooses to split the root node using the $\texttt{odor}$-feature, for all trees except when using chi2 as scoring function, which uses $\texttt{ring-type}$. Alternatively $\texttt{scikit-learn}$ splits using $\texttt{gill-color}$. An example of a tree is shown in figure 5, where we see the tree built with our own decision tree code using a max depth of five. Table 4 and 5 show accuracy results for trees with a max depth of two and five, respectively. We see from these results that even for very small trees we get a fairly high accuracy, and already at a depth of five we are nearing a perfect score, while we with a depth of two have a performance equivalent to that of logistic regression. Somewhat surprisingly over-fitting, the bane of decision trees, does not seem to be an issue.
 
 We see that our feature selection has not proved particularly useful. As expected feature selection with mutual information provides a better end result than the \(\chi^2\) test statistic, but neither are better than using all features, and considering we need such a small tree for a high accuracy, we have no need for the performance boost.
-
+\newpage
 \begin{Verbatim}[commandchars=\\\{\}]
 	Table 3: The accuracy score for a single decision tree using various 
 	configurations of the input features. All trees have a maximum depth 
@@ -1139,7 +1147,9 @@ In figure 6 and 7 we see a comparison of the confusion matrices for a stub and a
 
 
 In tables 6 and 7 we look at how our ensemble methods fare. We see that bagging and random forests give no improvement to our accuracy score. This is unsurprising, as our tree did not seemed plagued by high variance. We see that using adaptive boosting gives the best accuracy, reaching an accuracy of $100\%$ using trees with a max depth of only two.
-
+Figure 8 shows the confusion matrix for adaptive boosting using only stubs. We see 
+once again that only edible mushrooms are misclassified, and very 
+rarely.
 \begin{Verbatim}[commandchars=\\\{\}]
 	Table 6: The accuracy score for ensemble methods. All trees have a 
 	maximum depth of one, and two leaf nodes. All methods use 100 trees 
@@ -1160,15 +1170,13 @@ In tables 6 and 7 we look at how our ensemble methods fare. We see that bagging 
 	\end{center}
 \end{table}
 
+\newpage
 \begin{Verbatim}[commandchars=\\\{\}]
 	Table 7: The accuracy score for ensemble methods. All trees have a 
 	maximum depth of two, and four leaf nodes. All methods use 100 trees 
 	to build the ensemble. In random forest five features are picked at 
 	random for each tree. The confusion matrix here is not very 
-	interesting as it is identical to that in figure 7. Figure 8 shows 
-	the confusion matrix for adaptive boosting using only stubs. We see 
-	once again that only edible mushrooms are misclassified, and very 
-	rarely.
+	interesting as it is identical to that in figure 7. 
 \end{Verbatim}
 
 \begin{table}[h!]
@@ -1303,7 +1311,7 @@ distributed among the three possible classes.
  \end{Verbatim}
  
 
- \hspace*{\fill} \\
+\newpage
     \begin{Verbatim}[commandchars=\\\{\}]
 Table 9: Focusing on the correlations between the features and the target, 
 fetal health. We see that $\texttt{prolongued\_decelerations}$, 
@@ -1316,7 +1324,7 @@ values of the correlations are shown, in descending order.
     \begin{center}
 	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{ordered_correlations_fetal_health.png}
 \end{center}
-{ \hspace*{\fill} \\}
+
         
     Figure 10 shows the correlation matrix for this dataset, while table
 9 makes the correlation of the features to the target more clear.
