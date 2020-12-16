@@ -2,12 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-
 import warnings
-# import os 
-# import sys
-# sys.path.append('../Code')
-# sys.path.append('../Data')
+
 import DecisionTree as dt
 
 

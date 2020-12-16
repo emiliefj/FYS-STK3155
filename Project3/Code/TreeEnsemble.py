@@ -140,20 +140,11 @@ class RandomForest(Bagging):
 
 class AdaptiveBoosting(Bagging):
     '''
+    Creates an ensemble of trees using adaptive boosting, or 
+    AdaBoost.
+
     Code influenced by scikit-learn's AdaBoostClassifier:
     https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostClassifier.html
-    Algorithm:
-    Step 1: assign equal weight to each observation
-    weights = np.ones()*1./X.shape[0]
-    (repeat 2-4 for all learners)
-    Step 2: fit learner to a random sample (with replacement) of the 
-    weighted observations
-    Step 3: calculate error by summing up the weight of those misclassified
-    error = sum(weights of misclassified observation)/sum(weights)
-    Step 4: update weights of the misclassified entries using the quantity
-    alpha=log(1−error)/error: weight_i = weight_i*exp(alpha) for incorrectly
-    classified entries, and weight_i = weight_i*exp(-alpha) for correctly
-    classified entries.
     '''
     def fit(self, X, y):
         '''
@@ -169,13 +160,10 @@ class AdaptiveBoosting(Bagging):
         '''
         self.classes = np.unique(y)
         self.trees = []
-        # N = len(y) 
-        # n = self.n_samples
-        # if isinstance(n,float):
-        #     n = int(N*n)
+
         N = len(y)
         # Initialize weights:
-        w = (np.ones(N)*1./N)#.reshape(-1,1)
+        w = (np.ones(N)*1./N)
 
         for i in range(self.N_trees):
 
@@ -236,10 +224,6 @@ if __name__ == '__main__':
     y_pred = sk_tree.predict(X_test)
     print("Test accuracy: ", dt.accuracy(y_pred,y_test))
 
-    # from sklearn.tree import export_text
-    # print()
-    # print("The tree using scikitlearn's DecisionTreeClassifier:")
-    # print(export_text(sk_tree, feature_names=list(features)))
 
     # Own bagging code
     bagging = Bagging(n_trees,n_samples=n_samples,max_depth=max_depth, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes,seed=random)

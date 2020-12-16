@@ -9,7 +9,17 @@ class DecisionTree():
     '''
     A decision tree for classification.
 
-
+    impurity_measure    - the chosen impurity measure used when 
+                          building the tree
+    max_depth           - the maximum depth of the created tree
+    max_leaf_nodes      - the maximum number of leaf nodes in 
+                          the created tree. Due to the way the 
+                          tree is built the final numbar may 
+                          surpass this
+    seed                - integer for setting rng seed, used for
+                          reproduceability
+    print_success       - if True, the final depth and number of 
+                          leaves is printed for the created tree.
     '''
     def __init__(self, impurity_measure='gini', max_depth=5, max_leaf_nodes=10,seed=71,print_success=True):
         np.random.seed(seed)
@@ -151,10 +161,6 @@ class DecisionTree():
             self.make_leaf(node,y)
             return
         
-        # if X.shape[0] < self.min_samples_split:
-        #     node.leaf = True
-        #     return
-        
         # All entries belong to same class, making leaf
         if np.unique(y).shape[0] == 1:
             self.make_leaf(node,y)
@@ -202,18 +208,20 @@ class DecisionTree():
             return 1./z
 
     def find_split(self, X, y):
-        # print(f"finding split for \n{X}.")
-        start_impurity = self.calculate_impurity(y) # ?
-        # print(f"found start_impurity {start_impurity}.")
+        '''
+        Finds the split at the current node which reduces the impurity
+        the most, if an improvement is found. Sets the associated 
+        feature and threshold value for the node.
+        '''
 
-        # print(pd.DataFrame(X,y))
-        split_impurity = start_impurity #start_impurity
+        start_impurity = self.calculate_impurity(y) 
+
+        split_impurity = start_impurity
 
         split_threshold = None
         split_feature = None
         right = None
         left = None
-        # print(f"start_impurity: {start_impurity}")
 
         N = X.shape[0]
         N_features = X.shape[1]
@@ -222,7 +230,6 @@ class DecisionTree():
 
         for i in feature_loop:
             unique_values, frequency = np.unique(X[:,i], return_counts=True)
-            # print(f"i: {i} unique_values: {unique_values} frequency: {frequency}.")
 
             for val in unique_values:
                 threshold = val
@@ -234,14 +241,13 @@ class DecisionTree():
                 else: # for string features equality is used
                     left_index = np.where(X[:,i]==val)
                     right_index = np.where(X[:,i]!=val)
-                impurity_left = self.calculate_impurity(y[left_index])*len(left_index[0])/N#self.impurity_weight(len(left_index[0]))
-                impurity_right = self.calculate_impurity(y[right_index])*len(right_index[0])/N#self.impurity_weight(len(right_index[0]))
+                impurity_left = self.calculate_impurity(y[left_index])*len(left_index[0])/N
+                impurity_right = self.calculate_impurity(y[right_index])*len(right_index[0])/N
 
                 impurity = impurity_left + impurity_right
-                # print("feat: ", i, " split at: ", threshold, " gives impurity =",impurity)
+   
                 if(impurity<split_impurity):
-                    # print("!winner! feat: ", i, " split at: ", threshold, "  impurity=",impurity)
-
+  
                     split_threshold = threshold
                     split_impurity = impurity
                     split_feature = i
@@ -443,7 +449,7 @@ def test_scikit_tree(X_train, y_train, X_test, y_test, max_depth=5, max_leaf_nod
         print(export_text(sk_tree, feature_names=list(feature_names)))
 
         
-def build_and_test_tree(X_train, y_train, X_test, y_test, max_depth=5, max_leaf_nodes=10, random=13, name="iris", print_tree=False, feature_names=None, print_success=False):
+def build_and_test_tree(X_train, y_train, X_test, y_test, max_depth=5, max_leaf_nodes=10, random=13, name="iris", print_tree=False, feature_names=None, print_success=True):
 
     tree = DecisionTree(max_depth=max_depth, max_leaf_nodes=max_leaf_nodes,seed=random,print_success=print_success)
     tree.fit(X_train,y_train)

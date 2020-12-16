@@ -19,6 +19,12 @@ def variance_threshold(X_train, cutoff=0.8):
 
 
 def feature_selection(X_train,y_train,method='chi2',plot=False, filename=None):
+    '''
+    Performs feature selection on input data using given method. Supported 
+    choices include 'chi2', 'mutual_info' and 'f_classif' (ANOVA f-test). 
+    If plot=True a barplot of the scoring is plotted. If a filename is given
+    the plot is saved with this name. Otherwose it is displayed.
+    '''
     from sklearn.feature_selection import SelectKBest
 
     if(method=='chi2'):
