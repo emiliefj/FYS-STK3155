@@ -156,7 +156,7 @@
     \renewcommand{\LaTeX}{\textrm{\Oldlatex}}
     % Document parameters
     % Document title
-    \title{Project3\_fys-stk3155}
+    \title{Project3 - FYS-STK3155}
     
     
     
@@ -383,7 +383,9 @@
     \hypertarget{abstract}{%
 \section{Abstract}\label{abstract}}
 
+    In this project we have used a set of decision tree models to perform classification on two datasets. Decision trees are generally considered a 'weaker' machine learning method, without the same predictive power as many of the more complex models, like neural networks. It is nonetheless a very popular method, in part due to the ease of interpreting such models. What we have found in this project is that depending on the data at hand, decision trees may give more than satisfactory performance results. We have looked at two datasets, one for mushroom classification, and one for classification of fetal health risk groups. For the former decision trees appeared to outperform logistic regression even for small trees, with the added plus that the resulting model was very easy to interpret, with rules one could learn and actually use while out picking mushrooms. While the dataset had many features, making it difficult to see what features to focus on, our decision tree illuminated some key features and accompanying values to focus on.
     
+    For our fetal health dataset, which was also one of high dimensionality we saw a poorer performance for a single, small tree, but by increasing the size of the tree and also adding ensemble methods we reached an improved accuracy compared to logistic regression. While logistic regression gave an accuracy of about 0.85, we managed to get as high as 0.96 when using adaptive boosting and trees of depth five. Exploring this final dataset also showed us the key pitfall when working with unbalanced datasets; a falsely elevated accuracy. We saw how simply classifying all data to the largest class gave an fairly high accuracy, while not actually being of any use. 
 
     \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -483,7 +485,7 @@ mushrooms {[}1{]}:
 \subsection{Fetal Health[3][4]}\label{fetal-health}}
 
 A dataset of 2126 entries, each described by 22 features. There are no
-missing or $\texttt{Null}$ values. Table number shows values for descriptive
+missing or $\texttt{Null}$ values. Table 8 shows values for descriptive
 statistics like min and max values, mean, and standard deviation. The
 target value is \(\texttt{fetal\_health}\) which can take one of three
 classes:
@@ -494,11 +496,16 @@ classes:
 \end{itemize}
 as determined by three expert obstetricians.
 
-We see from figure number that, not unexpectedly, most entries are in
+We see from figure 9 that, not unexpectedly, most entries are in
 the \emph{Normal} class. As such the dataset is quite unbalanced.
 
     \hypertarget{methods}{%
 \section{Methods}\label{methods}}
+
+    \hypertarget{log-reg}{%
+	\subsection{Logistic Regression}\label{log-reg}}
+
+See Methods section in project 2[13].
 
     \hypertarget{decision-trees}{%
 \subsection{Decision Trees}\label{decision-trees}}
@@ -511,9 +518,7 @@ split into nodes, or "branches", ending in the end-nodes also known as
 one of the features of the data, like for instance "is
 height\textgreater=2.0m?".
 
-When using a decision tree for prediction we move down the tree with our
-input data, for each node determining whether to move left or right down
-the tree based on the value of the input data for the relevant
+When using a decision tree for prediction on new data we move down the tree, for each node determining whether to move left or right down the tree based on the value of the input data for the relevant
 "decision feature" at that node. Is the value below or above some
 threshold, or equal/not equal to some value? When we reach the end of
 the tree, one of the leaf nodes, this node tells us the resulting
@@ -783,14 +788,29 @@ See Methods section in project 2[13].
 \subsubsection{Confusion Matrix}\label{confusion-matrix}}
 A confusion matrix is a useful tool for visualizing the predictive accuracy of a model. Unlike the measure above, the confusion matrix illustrates the predictive accuracy per class. This way we can see what classes the model performs well of less well for, and information like what class misclassifications en up in instead.
 
-The matrix consists of one row and one column per class. The rows represent the predicted class, while the columns represent the actual or true class (or vice versa). Where the row and column for a class meet we have the number of correctly classified instances. Where rows and columns of different classes meet we have a wrongly classified instance, and we can see trends in misclassifications. See for instance figure number for an example. 
+The matrix consists of one row and one column per class. The rows represent the predicted class, while the columns represent the actual or true class (or vice versa). Where the row and column for a class meet we have the number of correctly classified instances. Where rows and columns of different classes meet we have a wrongly classified instance, and we can see trends in misclassifications. See for instance figure 6 for an example. 
 
 \hypertarget{roc-curve}{%
 \subsubsection{ROC Curve}\label{roc-curve}}
 A receiver operating characteristic curve, or ROC curve, is another tool for visualizing a model's predictive performance, more specifically a binary model. It consists of a graphical plot of false positive rate vs true positive rate for a set of discriminative thresholds. The area under the curve is one measure of model performance, with a perfect model getting a score of one.
 
 \hypertarget{ext-lib}{%
-	\subsection{Extermal Libraries}\label{ext-lib}}
+	\subsection{External Libraries and Code Structure}\label{ext-lib}}
+
+While We have written my own code for the decision tree code, as well ass the various ensemble methods used, we have used functionality from the library scikit-learn[14] both to compare with our own code, and to increase performance for the ensemble methods. I have also used this library for splitting the data set. This python library is based on
+numpy and and scipy, and contains a wide array of machine learning algorithms, including tree based methods.
+
+Other packages I've used is numpy{[}15{]} for array handling,
+matplotlib.pyplot{[}16{]} for plots and visualizations, and scikitplot[17] for plotting the cunfusion matrices and ROC curves.
+
+I have developed a class \(\texttt{DecisionTree}\) for creating decision trees. This is located in a file of the same name in the Code directory and aslo includes some relevant helper functions like for printing the tree, calculating accuracy, and comparing with the equivalent functionality in scikit-learn. The file also contains two examples for using the code, using datasets from scikit-learn.
+
+The class\(\texttt{TreeEnsemble}\) is a base class for ensembles of trees, and the file with the same name in the Code directory contains all the ensemble classes I've made, and again a usage example using datasets from scikit-learn. The Ensemble methods use scikit-learn's \(\texttt{DecisionTreeClassifier()}\) in place of the \(\texttt{DecisionTree}\) class simply due to the latter being quite slow.
+
+I have done testing continuously by comparing results to results using the scikit-learn for a number of datasets.
+
+Code available from the following github repository:
+https://github.com/emiliefj/FYS-STK3155.
 
 \hypertarget{results-and-discussion}{%
 \section{Results and Discussion}\label{results-and-discussion}}
@@ -883,7 +903,7 @@ dtype: int64
         
     Another point of interest is whether the data are fairly evenly divided
 among the two categories. We check this by comparing the number of
-entries belonging to each class as shown in figure number.
+entries belonging to each class as shown in figure 1.
 
 
     \begin{center}
@@ -892,16 +912,16 @@ entries belonging to each class as shown in figure number.
     { \hspace*{\fill} \\}
     
     \begin{Verbatim}[commandchars=\\\{\}]
-Figure 2: Histogram of class distribution. We can see the dataset contains a
+Figure 1: Histogram of class distribution. We can see the dataset contains a
 fairly even split between the two
 classes.
     \end{Verbatim}
 
-    Figure number shows a heatmap of the correlations between the features.
+    Figure 2 shows a heatmap of the correlations between the features.
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-Figure number: A heatmap showing the correlation matrix for the features in the
+Figure 2: A heatmap showing the correlation matrix for the features in the
 mushroom dataset.
     \end{Verbatim}
 
@@ -944,7 +964,7 @@ excluding four of the features, namely \(\texttt{gill-attachment}\),
 to 17.
         
  We can compare this to univariate feature selection. The result when using
-chi-squared statistic, can be seen in figure number. We find from this
+chi-squared statistic, can be seen in figure 3. We find from this
 result that comparing the features using this statistic the key features
 to include are features 8, 17, 7, 3, 10, 20, and 6, corresponding to
 \(\texttt{gill-color}\), \(\texttt{ring-type}\), \(\texttt{gill-size}\),
@@ -957,7 +977,7 @@ to include are features 8, 17, 7, 3, 10, 20, and 6, corresponding to
 { \hspace*{\fill} \\}
 
 %\begin{Verbatim}[commandchars=\\\{\}]
-	Figure number: Bar plot showing the chi-squared scores of the the
+	Figure 3: Bar plot showing the chi-squared scores of the the
 	features in the mushroom dataset. We see that feature eight has the
 	clear highest score. This corresponds to \(\texttt{gill-color}\).
 %\end{Verbatim}
@@ -965,7 +985,7 @@ to include are features 8, 17, 7, 3, 10, 20, and 6, corresponding to
 Using instead the mutual information as scoring function we find that
 more features are included, Most notably feature four,
 \(\texttt{odor}\), has gone from not being included to being the main
-feature. A bar plot is shown in figure number. This result correlates
+feature. A bar plot is shown in figure 4. This result correlates
 more closely with our expectations as we know from the known rules
 described in the Data section that using only \(\texttt{odor}\) is
 enough to get a \(98.52\%\) accuracy on this dataset.
@@ -975,14 +995,16 @@ enough to get a \(98.52\%\) accuracy on this dataset.
 	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/mushroom/mutual_info-scores-mushroom_small.png}
 \end{center}
 { \hspace*{\fill} \\}
-    Figure number: Bar plot showing the mutual information scores of the the
+    Figure 4: Bar plot showing the mutual information scores of the the
 features in the mushroom dataset. We see that feature four,
 \(\texttt{odor}\) scores highest.
 
     \hypertarget{model-comparisons}{%
 	\subsubsection{Model Comparisons}\label{model-comparisons}}
 
-We have fit several models to our mushroom dataset. We know from the four simple rules in the description of the dataset from the Data section, that one should not need a very complex model to achieve a fairly high precision. Table 3 shows the accuracy scores for a single 'stub', a tree with just a root node and two leaves. My DecisionTree chooses to split the root node using the $\texttt{odor}$-feature, for all trees except when using chi2 as scoring function, which uses $\texttt{ring-type}$. Alternatively $\texttt{scikit-learn}$ splits using $\texttt{gill-color}$. An example of a tree is shown in figure number, where we see the tree built with our own decision tree code using a max depth of five. Table 4 and 5 show accuracy results for trees with a max depth of two and five, respectively. We see from these results that even for very small trees we get a fairly high accuracy, and already at a depth of five we are nearing a perfect score. Somewhat surprisingly overfitting, the bane of decision trees, does not seem to be an issue.
+We have fit several models to our mushroom dataset. As a baseline I have used logistic regression to classify the data. Using cross validation I determined the optimal learning rate on this data to be 1.0, and using 100 epochs and a batchsize of 50 the resulting accuracy is 0.958 on the validation dataset.
+
+ We know from the four simple rules in the description of the dataset from the Data section, that one should not need a very complex model to achieve a fairly high precision. Table 3 shows the accuracy scores for a single 'stub', a tree with just a root node and two leaves. My DecisionTree chooses to split the root node using the $\texttt{odor}$-feature, for all trees except when using chi2 as scoring function, which uses $\texttt{ring-type}$. Alternatively $\texttt{scikit-learn}$ splits using $\texttt{gill-color}$. An example of a tree is shown in figure 5, where we see the tree built with our own decision tree code using a max depth of five. Table 4 and 5 show accuracy results for trees with a max depth of two and five, respectively. We see from these results that even for very small trees we get a fairly high accuracy, and already at a depth of five we are nearing a perfect score, while we with a depth of two have a performance equivalent to that of logistic regression. Somewhat surprisingly over-fitting, the bane of decision trees, does not seem to be an issue.
 
 We see that our feature selection has not proved particularly useful. As expected feature selection with mutual information provides a better end result than the \(\chi^2\) test statistic, but neither are better than using all features, and considering we need such a small tree for a high accuracy, we have no need for the performance boost.
 
@@ -1076,24 +1098,24 @@ The tree using my own code:
 |   |   |   |   |   |--- class: 1,    prediction: ['0.0', '1.0']	
 \end{BVerbatim}
 \\
-Figure number: An example of a decision tree created with our own code. The 'prediction' list gives the probabilities per class for that leaf node according to the training data. We see that the features used in creating the tree are tightly connected to those used in the four simple rules defined for the dataset.
+Figure 5: An example of a decision tree created with our own code. The 'prediction' list gives the probabilities per class for that leaf node according to the training data. We see that the features used in creating the tree are tightly connected to those used in the four simple rules defined for the dataset.
 { \hspace*{\fill} \\}
 
-In figure number and number we see a comparison of the confusion matrices for a stub and a larger decision tree. We see that the stub mostly misclassifies class 0, the edible class. This is good news as wrongly classifying a poisonous mushroom as edible will potentially have much more dire consequences than misclassifying an edible mushroom as poisonous.
+In figure 6 and 7 we see a comparison of the confusion matrices for a stub and a larger decision tree. We see that the stub mostly misclassifies class 0, the edible class. This is good news as wrongly classifying a poisonous mushroom as edible will potentially have much more dire consequences than misclassifying an edible mushroom as poisonous.
 
 \begin{center}
 	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/mushroom/normalized_confusion_matrix_decisiontree_depth1.png}
 \end{center}
 { \hspace*{\fill} \\}
-Figure number: The confusion matrix for a single decision tree with a depth of one.
+Figure 6: The confusion matrix for a single decision tree with a depth of one.
 
 \begin{center}
 	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/mushroom/normalized_confusion_matrix_decisiontree_depth5.png}
 \end{center}
 { \hspace*{\fill} \\}
-Figure number: The confusion matrix for a single decision tree with a depth of five.
+Figure 7: The confusion matrix for a single decision tree with a depth of five.
 
-In tables 6 and 7 we look at how our ensemble methods fare. We see that bagging and random forests give no improvement to our accuracy score. This is unsurprising, as our tree did not seemed plagued by high variance. We see that using adaptive boosting gives the best accuracy, reachin an accuracy of $100\%$ using trees with a max depth of only two.
+In tables 6 and 7 we look at how our ensemble methods fare. We see that bagging and random forests give no improvement to our accuracy score. This is unsurprising, as our tree did not seemed plagued by high variance. We see that using adaptive boosting gives the best accuracy, reaching an accuracy of $100\%$ using trees with a max depth of only two.
 
 { \hspace*{\fill} \\}
 Table 6: The accuracy score for ensemble methods. All trees have a maximum depth of one, and two leaf nodes. All methods use 100 trees to build the ensemble. In random forest five features are picked at random for each tree. 
@@ -1111,7 +1133,7 @@ Table 6: The accuracy score for ensemble methods. All trees have a maximum depth
 \end{table}
 
 { \hspace*{\fill} \\}
-Table 7: The accuracy score for ensemble methods. All trees have a maximum depth of two, and four leaf nodes. All methods use 100 trees to build the ensemble. In random forest five features are picked at random for each tree. The confusion matrix here is not very interesting as it is identical to that in figure number. Figure number shows the confusion matrix for adaptive boosting using only stubs. We see once again that only edible mushrooms are misclassified, and very rarely.
+Table 7: The accuracy score for ensemble methods. All trees have a maximum depth of two, and four leaf nodes. All methods use 100 trees to build the ensemble. In random forest five features are picked at random for each tree. The confusion matrix here is not very interesting as it is identical to that in figure 7. Figure 8 shows the confusion matrix for adaptive boosting using only stubs. We see once again that only edible mushrooms are misclassified, and very rarely.
 \begin{table}[h!]
 	\begin{center}
 		\label{tab:table1}
@@ -1129,21 +1151,24 @@ Table 7: The accuracy score for ensemble methods. All trees have a maximum depth
 	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/mushroom/normalized_confucion_matrix_adaboost.png}
 \end{center}
 { \hspace*{\fill} \\}
-Figure number: The confusion matrix for adaptive boosting with 100 stubs.
+Figure 8: The confusion matrix for adaptive boosting with 100 stubs.
 
     \hypertarget{fetal-health}{%
 \subsection{Fetal Health}\label{fetal-health}}
 
+\hypertarget{pre-processing-the-data2}{%
+	\subsubsection{Pre-processing the Data}\label{pre-processing-the-data2}}
+The fetal health dataset consists of 22 input features, all of which are numerical, and mostly continuous. Table 8 shows descriptive statistics for the 22 features, and the target $\texttt{fetal\_health}$. We know that the target takes one of three classes, $\texttt{normal}$, $\texttt{suspect}$, or $\texttt{pathological}$, yet we see that the $75\%$ percentile has the value 1. This indicates that our dataset is quite skewed. 
+Figure 9 shows the distribution of entries between the three classes. We see that more than three quarters of the data belong to the first class. We could attempt to balance out the dataset and create one with a more equal distribution between the classes, vut we have decided not to in order to explore how such a skewed dataset affects prediction accuracy for our models.
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-Table number: A table showing key statistical values for the features in the
-fetal health dataset.
-    \end{Verbatim}
+%    \begin{Verbatim}[commandchars=\\\{\}]
+Table 8: A table showing key statistical values for the features in the fetal health dataset.
+%    \end{Verbatim}
 
             \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
 {\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-                                                     count        mean  \textbackslash{}
+                                                     count        mean  
 baseline value                                      2126.0  133.303857
 accelerations                                       2126.0    0.003178
 fetal\_movement                                      2126.0    0.009481
@@ -1167,7 +1192,7 @@ histogram\_variance                                  2126.0   18.808090
 histogram\_tendency                                  2126.0    0.320320
 fetal\_health                                        2126.0    1.304327
 
-                                                          std    min      25\%  \textbackslash{}
+                                                          std    min      25\%  
 baseline value                                       9.840844  106.0  126.000
 accelerations                                        0.003866    0.0    0.000
 fetal\_movement                                       0.046666    0.0    0.000
@@ -1223,9 +1248,10 @@ fetal\_health                                          1.000    1.000    3.000
     { \hspace*{\fill} \\}
     
     \begin{Verbatim}[commandchars=\\\{\}]
-Figure number: A pie plot showing how the target variable fetal health is
+Figure 9: A pie plot showing how the target variable fetal health is
 distributed among the three possible classes.
     \end{Verbatim}
+
 
     \begin{center}
     \adjustimage{width=1.2\textwidth,center}{output_49_1.png}
@@ -1233,13 +1259,14 @@ distributed among the three possible classes.
     { \hspace*{\fill} \\}
 
  \begin{Verbatim}[commandchars=\\\{\}]
- 	Figure number: A heatmap showing the correlation matrix for the features 
+ 	Figure 10: A heatmap showing the correlation matrix for the features 
  	in the fetal health dataset.
  \end{Verbatim}
  
 
+ \hspace*{\fill} \\
 %    \begin{Verbatim}[commandchars=\\\{\}]
-Table number: Focusing on the correlations between the features and the target, 
+Table 9: Focusing on the correlations between the features and the target, 
 fetal health. We see that $\texttt{prolongued\_decelerations}$, 
 $\texttt{abnormal\_short\_term\_variability}$, and 
 $\texttt{percentage\_of\_time\_with\_abnormal\_long\_term\_variability}$ are most closely 
@@ -1252,13 +1279,12 @@ values of the correlations are shown, in descending order.
 \end{center}
 { \hspace*{\fill} \\}
         
-    Figure number shows the correlation matrix for this dataset, while table
-number makes the correlation of the features to the target more clear.
+    Figure 10 shows the correlation matrix for this dataset, while table
+9 makes the correlation of the features to the target more clear.
 We see that \(\texttt{prolongued\_decelerations}\),
 \(\texttt{abnormal\_short\_term\_variability}\), and
 \(\texttt{percentage\_of\_time\_with\_abnormal\_long\_term\_variability}\) are
-the features that correlate most strongly witht he resulting
-classification. Between the features we see that there is naturally a
+the features that correlate most strongly with the classification. Between the features we see that there is naturally a
 very strong correlation between \(\texttt{histogram\_mode}\),
 \(\texttt{histogram\_mean}\), and \(\texttt{histogram\_median}\). as well
 as between \(\texttt{histogram\_width}\), \(\texttt{histogram\_min}\), and
@@ -1268,132 +1294,167 @@ features as well and as such contribute with mush the same information,
 which means we do not gain much, if any, more insight by including all
 three in our model.
 
+    \hypertarget{feature-selection2}{%
+	\subsubsection{Feature Selection}\label{feature-selection2}}
+ We have performed feature selection for this dataset as well. As we do not have categorical features we have used ANOVA f-test in place of the chi-squared statistic when performing univariate feature selection. For the variance threshold variable selection we have again used 0.8 as the cutoff value.
  
-    \begin{Verbatim}[commandchars=\\\{\}]
+Variance threshold variable selection leads to selecting 15 out of the 22 features, while we have chosen the 9 and 16 highest scoring features with ANOVA f-test and mutual information, respectively. All methods have in common the features $\texttt{baseline value}$, $\texttt{abnormal\_short\_term\_variability}$, $\texttt{percentage\_of\_time\_with\_abnormal\_long\_term\_variability}$, $\texttt{histogram\_mode}$, $\texttt{histogram\_mean}$, $\texttt{histogram\_median}$, and $\texttt{histogram\_variance}$',
 
-* Created a decision tree with 6 leaves, and a depth of 5 at the deepest.*
+ with variance threshold including also $\texttt{mean\_value\_of\_short\_term\_variability}$, $\texttt{mean\_value\_of\_long\_term\_variability}$, $\texttt{histogram\_min}$,  $\texttt{histogram\_max}$, $\texttt{histogram\_number\_of\_peaks}$, $\texttt{histogram\_number\_of\_zeroes}$, $\texttt{histogram\_tendency}$ , and $\texttt{histogram\_width}$.
+ 
+ 
+ Using ANOVA f-test we select in addition to the common features, the two features $\texttt{prolongued\_decelerations}$ and $\texttt{accelerations}$, giving a total of nine. A bar plot of the scoring is seen in figure 11.
+ 
+ Scoring the features using mutual information we select the top 16 features, which are the common seven plus the following nine: $\texttt{mean\_value\_of\_short\_term\_variability}$, $\texttt{histogram\_width}$, $\texttt{accelerations}$, $\texttt{histogram\_min}$, $\texttt{prolongued\_decelerations}$, $\texttt{mean\_value\_of\_long\_term\_variability}$, $\texttt{uterine\_contractions}$, $\texttt{histogram\_max}$, and $\texttt{light\_decelerations}$. A bar plot of the scoring is seen in figure 12.
+ 
+ 
+ \begin{center}
+ 	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/fetal health/f-value-scores-fetal_health_with.png}
+ \end{center}
+ { \hspace*{\fill} \\}
+ 
+ %\begin{Verbatim}[commandchars=\\\{\}]
+ Figure 11: Bar plot showing the f-test scores of the the
+ features in the fetal health dataset. We see that feature six has the
+ clear highest score. This corresponds to $\texttt{prolongued\_decelerations}$.
+ %\end{Verbatim}
+ 
 
-Testing own decision tree code on fetal\_health dataset:
-Train accuracy:  0.8294117647058824
-Test accuracy:  0.8352941176470589
+ 
+ \begin{center}
+ 	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/fetal health/mutual_info-scores-fetal_health_with.png}
+ \end{center}
+ { \hspace*{\fill} \\}
+ Figure 12: Bar plot showing the mutual information scores of the the
+ features in the fetal health dataset. We see that features seven, eight and nine have the highest scores. They correspond to 
+ $\texttt{abnormal\_short\_term\_variability}$, $\texttt{mean\_value\_of\_short\_term\_variability}$ and $\texttt{percentage\_of\_time\_with\_abnormal\_long\_term\_variability}$, so they all describe the variability.
+  
+     \hypertarget{model-comparisons2}{%
+ 	\subsubsection{Model Comparisons}\label{model-comparisons2}}
 
-The tree using my own code:
-|--- histogram\_mean <= 89.00
-|   |--- weights:  class: 3.0,    prediction: ['0.0', '0.0', '1.0']
-|--- histogram\_mean >  89.00
-|   |--- mean\_value\_of\_long\_term\_variability <= 73.00
-|   |   |--- mean\_value\_of\_short\_term\_variability <= 81.00
-|   |   |   |--- histogram\_median <= 87.00
-|   |   |   |   |--- weights:  class: 3.0,    prediction: ['0.0', '0.0', '1.0']
-|   |   |   |--- histogram\_median >  87.00
-|   |   |   |   |--- abnormal\_short\_term\_variability <= 0.00
-|   |   |   |   |   |--- weights:  class: 1.0,    prediction: ['0.8', '0.1',
-'0.0']
-|   |   |   |   |--- abnormal\_short\_term\_variability >  0.00
-|   |   |   |   |   |--- weights:  class: 3.0,    prediction: ['0.0', '0.0',
-'1.0']
-|   |   |--- mean\_value\_of\_short\_term\_variability >  81.00
-|   |   |   |--- weights:  class: 3.0,    prediction: ['0.0', '0.0', '1.0']
-|   |--- mean\_value\_of\_long\_term\_variability >  73.00
-|   |   |--- weights:  class: 3.0,    prediction: ['0.0', '0.0', '1.0']
+As a baseline I have again used logistic regression on the data. Using cross validation I determined the optimal learning rate on this data to be 0.001, and using 100 epochs and a batchsize of 50 the resulting accuracy is 0.849 on the validation dataset.
 
+We begin by comparing model performance using a single tree with the features as selected above. Using a stub, a tree with depth one, all models create the same tree, as shown in figure 13. The resulting accuracy is then 0.778 both on the training and validation sets.
 
+Using a slightly larger tree, with a depth of two, we get the results as seen in table 10. All models seem to have fairly equal performance. This is unsurprising as they use the same root node like for the stubs, and as such do not vary much between them. We saw that all three feature selection methods ended with very many features in common, which is to say they agree fairly well on the most important features. 
 
-Testing scikit-learn's DecisionTreeClassifier on fetal\_health dataset:
-Train accuracy:  0.941764705882353
-Test accuracy:  0.9458823529411765
-    \end{Verbatim}
+\begin{BVerbatim}
+	The tree using my own code:
+	|--- abnormal_short_term_variability <= 59.00
+	|   |--- class: 0,    prediction: ['0.9', '0.1', '0.0']
+	|--- abnormal_short_term_variability >  59.00
+	|   |--- class: 0,    prediction: ['0.4', '0.3', '0.2']
+\end{BVerbatim}
+\\
+Figure 13: The fetal health stub.
+{ \hspace*{\fill} \\}
 
+ 
+{ \hspace*{\fill} \\}
+Table 10: The accuracy score for a single decision tree using various configurations of the input features. All trees have a maximum depth of two, and four leaf nodes.
+\begin{table}[h!]
+	\begin{center}
+		\label{tab:table1}
+		\begin{tabular}{l|r|r}
+			\textbf{Model}                                                      		   & \textbf{Training} & \textbf{Validation}
+			\\ \hline
+			\textbf{Single decision tree, own code}                                        & 0.827         & 0.845               \\ \hline
+			\textbf{Single decision tree, scikit-learn}                                    & 0.851         & 0.866               \\ \hline
+			\textbf{Single decision tree, 15 features selected with variance threshold}    & 0.843         & 0.832               \\ \hline
+			\textbf{Single decision tree, 9 features selected with f-test}                 & 0.827         & 0.807               \\ \hline
+			\textbf{Single decision tree, 16 features selected with mutual information}    & 0.827         & 0.807               \\ \hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+It is tempting to say that the accuracy we get is good, especially considering how small of a tree we are using. Looking at the confusion matrix in figure 14, however, we see that the total accuracy is deceiving. Our accuracy measure is strongly influenced by the accuracy in determining class 1 (0 in the figure), or $\texttt{normal}$ which dominates the dataset. While performance for the $\texttt{suspect}$ class is adequate, the model is quite useless at classifying entries to the $\texttt{pathelogical}$ class. 
+ 
+ \begin{center}
+ 	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/fetal health/normalized_confucion_matrix_full_tree_depth2.png}
+ \end{center}
+ { \hspace*{\fill} \\}
+ Figure 14: The confusion matrix for a single decision tree on full data set with a depth of two.
+
+We move on to explore our ensemble methods, to see if they fare better. Table 11 shows the resulting accuracy measures when our ensembles are made up of trees with depth two. Unlike for our mushroom dataset bagging now seems to come out on top, while adaptive boosting is more disappointing. The confusion matrices shown in figures 15 and 16 support this assessment. We see that our adaptive boosting ensemble is classifying almost all entries to the $\texttt{normal}$ class. Bagging, while it has lost some accuracy on the middle class as compared to a single tree, performs much better for the $\texttt{pathelogical}$ class. 
+
+{ \hspace*{\fill} \\}
+Table 11: The accuracy score for ensemble methods. All trees have a maximum depth of two, and four leaf nodes. All methods use 100 trees to build the ensemble. In random forest five features are picked at random for each tree.
+\begin{table}[h!]
+	\begin{center}
+		\label{tab:table1}
+		\begin{tabular}{l|r|r}
+			\textbf{Model}                                                 	& \textbf{Training} & \textbf{Validation}
+			\\ \hline
+			\textbf{Bagging}                             		             & 0.887        & 0.882              \\ \hline
+			\textbf{Random forest}                                		     & 0.845        & 0.847              \\ \hline
+			\textbf{Adaptive boosting}   							    	 & 0.827        & 0.807                \\ \hline
+		\end{tabular}
+	\end{center}
+\end{table}
+  \begin{center}
+ 	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/fetal health/normalized_confucion_matrix_bagging_depth2.png}
+ \end{center}
+ { \hspace*{\fill} \\}
+ Figure 15: The confusion matrix for bagging 100 decision trees with a depth of two.
+ 
+  \begin{center}
+ 	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/fetal health/normalized_confucion_matrix_adaboost_depth2.png}
+ \end{center}
+ { \hspace*{\fill} \\}
+ Figure 16: The confusion matrix for adaptive boosting with 100 trees, all with a depth of two.
+ 
+ To achieve a more even performance across the class labels we need to use larger trees. Figures 17, 18r, and 19 show the confusion matrices and ROC curves for a single tree, a bagging ensemble, and an adaptive boosting ensemble, respectively. We see that for all three models the accuracy is more even across the class labels, and that once again adaptive boosting comes out as the winner in terms of best performance. Performance is still best for the first class, with the two arguably most important classes to identify lagging behind. Balancing the dataset may improve this situation. 
+ 
+   \begin{center}
+ 	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/fetal health/full_tree_depth5.png}
+ \end{center}
+ { \hspace*{\fill} \\}
+ Figure 17: The confusion matrix and ROC curves for a single tree of depth five, on the test set.
+ 
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_54_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
+ 	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/fetal health/adaboost_depth5.png}
+ \end{center}
+ { \hspace*{\fill} \\}
+ Figure 18: The confusion matrix and ROC curves for an AdaBoost ensemble with 100 trees of depth five, on the test set.
+ 
+     \begin{center}
+ 	\adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../../Results/fetal health/bagging_depth5.png}
+ \end{center}
+ { \hspace*{\fill} \\}
+ Figure 19: The confusion matrix and ROC curves for a bagging ensemble with 100 trees of depth five, on the test set.
+ 
+The final scores for the key models when tested on the test set, is shown in table 12. As we saw from the confusion matrices, adaptive boosting gives the optimal accuracy.
 
-The tree using scikitlearn's DecisionTreeClassifier:
-|--- percentage\_of\_time\_with\_abnormal\_long\_term\_variability <= 0.55
-|   |--- mean\_value\_of\_long\_term\_variability <= 68.50
-|   |   |--- mean\_value\_of\_short\_term\_variability <= 59.50
-|   |   |   |--- histogram\_max <= 138.50
-|   |   |   |   |--- uterine\_contractions <= 0.02
-|   |   |   |   |   |--- class: 1.0
-|   |   |   |   |--- uterine\_contractions >  0.02
-|   |   |   |   |   |--- class: 2.0
-|   |   |   |--- histogram\_max >  138.50
-|   |   |   |   |--- histogram\_min <= 17.50
-|   |   |   |   |   |--- class: 1.0
-|   |   |   |   |--- histogram\_min >  17.50
-|   |   |   |   |   |--- class: 2.0
-|   |   |--- mean\_value\_of\_short\_term\_variability >  59.50
-|   |   |   |--- mean\_value\_of\_short\_term\_variability <= 79.50
-|   |   |   |   |--- mean\_value\_of\_long\_term\_variability <= 6.50
-|   |   |   |   |   |--- class: 1.0
-|   |   |   |   |--- mean\_value\_of\_long\_term\_variability >  6.50
-|   |   |   |   |   |--- class: 2.0
-|   |   |   |--- mean\_value\_of\_short\_term\_variability >  79.50
-|   |   |   |   |--- light\_decelerations <= 0.00
-|   |   |   |   |   |--- class: 3.0
-|   |   |   |   |--- light\_decelerations >  0.00
-|   |   |   |   |   |--- class: 1.0
-|   |--- mean\_value\_of\_long\_term\_variability >  68.50
-|   |   |--- light\_decelerations <= 0.00
-|   |   |   |--- class: 3.0
-|   |   |--- light\_decelerations >  0.00
-|   |   |   |--- mean\_value\_of\_long\_term\_variability <= 77.00
-|   |   |   |   |--- class: 1.0
-|   |   |   |--- mean\_value\_of\_long\_term\_variability >  77.00
-|   |   |   |   |--- class: 3.0
-|--- percentage\_of\_time\_with\_abnormal\_long\_term\_variability >  0.55
-|   |--- histogram\_median <= 107.50
-|   |   |--- histogram\_number\_of\_peaks <= 220.50
-|   |   |   |--- mean\_value\_of\_short\_term\_variability <= 25.00
-|   |   |   |   |--- histogram\_median <= 102.00
-|   |   |   |   |   |--- class: 2.0
-|   |   |   |   |--- histogram\_median >  102.00
-|   |   |   |   |   |--- class: 1.0
-|   |   |   |--- mean\_value\_of\_short\_term\_variability >  25.00
-|   |   |   |   |--- class: 3.0
-|   |   |--- histogram\_number\_of\_peaks >  220.50
-|   |   |   |--- histogram\_tendency <= 23.50
-|   |   |   |   |--- class: 3.0
-|   |   |   |--- histogram\_tendency >  23.50
-|   |   |   |   |--- class: 1.0
-|   |--- histogram\_median >  107.50
-|   |   |--- mean\_value\_of\_long\_term\_variability <= 6.50
-|   |   |   |--- abnormal\_short\_term\_variability <= 0.00
-|   |   |   |   |--- histogram\_max <= 134.50
-|   |   |   |   |   |--- class: 1.0
-|   |   |   |   |--- histogram\_max >  134.50
-|   |   |   |   |   |--- class: 1.0
-|   |   |   |--- abnormal\_short\_term\_variability >  0.00
-|   |   |   |   |--- accelerations <= 129.50
-|   |   |   |   |   |--- class: 1.0
-|   |   |   |   |--- accelerations >  129.50
-|   |   |   |   |   |--- class: 3.0
-|   |   |--- mean\_value\_of\_long\_term\_variability >  6.50
-|   |   |   |--- histogram\_number\_of\_peaks <= 185.50
-|   |   |   |   |--- histogram\_median <= 143.50
-|   |   |   |   |   |--- class: 1.0
-|   |   |   |   |--- histogram\_median >  143.50
-|   |   |   |   |   |--- class: 1.0
-|   |   |   |--- histogram\_number\_of\_peaks >  185.50
-|   |   |   |   |--- mean\_value\_of\_short\_term\_variability <= 49.00
-|   |   |   |   |   |--- class: 1.0
-|   |   |   |   |--- mean\_value\_of\_short\_term\_variability >  49.00
-|   |   |   |   |   |--- class: 2.0
+{ \hspace*{\fill} \\}
+Table 12: The accuracy score of our models on the test set. All trees have a maximum depth of five. The ensemble methods use 100 trees to build the ensemble..
+\begin{table}[h!]
+	\begin{center}
+		\label{tab:table1}
+		\begin{tabular}{l|r}
+			\textbf{Model}                                                 	& \textbf{Training} \\ \hline
+			\textbf{Singel tree}                           		             & 0.899            \\ \hline
+			\textbf{Bagging}                                    		     & 0.944            \\ \hline
+			\textbf{Adaptive boosting}   							    	 & 0.962            \\ \hline
+		\end{tabular}
+	\end{center}
+\end{table}
 
-    \end{Verbatim}
-
-   
-    
-
-    
 
     \hypertarget{conclusion}{%
 \section{Conclusion}\label{conclusion}}
 
-    
+In this project we have looked at the relatively simple machine learning model that is the decision tree, and we have added complexity by creating ensemble methods from many such trees. What we have seen is that for some datasets, a single decision tree may be perfectly adequate to give a very good performance. We have also seen that where a single tree fails to give the desired performance, adding several together in an ensemble may be the solution. 
+
+While decision trees generally suffer from high variance, we have nod been plagues by this issue much for our chosen datasets. This is in part because we have looked at smaller trees, and the variance problem will likely increase the bigger you grow your trees, as a larger tree will be more closely adapted to the specifics of the training data. 
+
+Because of this missing variance issue, for lack of a better term, our standard ensemble methods added a limited boost to performance. We saw a better increase for the fetal health dataset, which makes sense as there was more to gain, and likely slightly larger variance issues. 
+
+For both our datasets we reached a performance comparable to that of logistic regression even when using just a single tree, and we found that the best performance was found for adaptive boosting, where wrongly classified data are given more weight in future tree fittings.
+
+A particular issue we encountered in the fetal health dataset was the importance of not looking solely at the accuracy measure to determine the model performance, especially for unbalanced datasets. A future improvement may be to try balancing the dataset before fitting the models to it.
+
+We would recommend giving decision trees a fair chance when selecting a machine learning model for your problems, particularly if you are looking to use the model for interpretation. It is easy to be attracted to the more complex, perhaps more 'fancy' models, but often times a simpler model will do, and perhaps even be easier to implement, saving you time to focus on interpretation.
+
 
     \hypertarget{bibliography}{%
 \section{Bibliography}\label{bibliography}}
@@ -1453,7 +1514,11 @@ visited 08.12.2020
 
 [13] Project 2: https://github.com/emiliefj/FYS-STK3155/blob/master/Project2/Report/Project%202%20-%20FYS-STK3155.pdf
 
+{[}14{]} SciKit-learn: https://scikit-learn.org/stable/index.html
 
+{[}15{]} Numpy: https://numpy.org/
+
+{[}16{]} MatPlotLib.PyPlot: https://matplotlib.org/api/pyplot\_api.html
     % Add a bibliography block to the postdoc
     
     
